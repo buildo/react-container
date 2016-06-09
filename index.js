@@ -4,7 +4,9 @@ import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
-import connect from 'state/connect';
+import _declareConnect from 'state/connect';
+import _declareQueries from 'react-avenger/queries';
+import _declareCommands from 'react-avenger/commands';
 import noLoaderLoading from './noLoaderLoading';
 
 const ContainerConfig = t.interface({
@@ -22,8 +24,13 @@ const DecoratorConfig = t.interface({
   declareCommands: t.maybe(t.Function)
 }, { strict: true, name: 'DecoratorConfig' });
 
+const PublicDecoratorConfig = t.extend(DecoratorConfig, {
+  allQueries: t.maybe(t.Object),
+  allCommands: t.maybe(t.Object)
+}, { strict: true, name: 'PublicDecoratorConfig' })
+
 const declareConnect: (decl = {}, config = {}) => (
-  connect(decl, { killProps: ['params', 'query', 'router'], ...config })
+  _declareConnect(decl, { killProps: ['params', 'query', 'router'], ...config })
 );
 
 const decorator = ({ declareQueries, declareCommands, declareConnect = declareConnect }) => (Component, config = {}) => {
@@ -71,6 +78,15 @@ const decorator = ({ declareQueries, declareCommands, declareConnect = declareCo
 
 const defaultWithConnectOnly = decorator(DecoratorConfig({ declareConnect }));
 
-export default function(...args) {
-  return ContainerConfig.is(args[1]) ? defaultWithConnectOnly(...args) : decorator(DecoratorConfig(args[0]))
-}
+export default const = (...args) = t.match(args[0],
+  ContainerConfig, () => defaultWithConnectOnly(...args),
+  DecoratorConfig, () => decorator(args[0]),
+  PublicDecoratorConfig, () => {
+    const {
+      declareQueries as dq, allQueries, declareCommands as dc, allCommands, declareConnect
+    } = args[0];
+    const declareQueries = dq || (allQueries && _declareQueries(allQueries)) || undefined;
+    const declareCommands = dc || (allCommands && _declareCommands(allCommands)) || undefined;
+    return decorator({ declareConnect, declareQueries, declareCommands });
+  }
+);
