@@ -22,7 +22,11 @@ const DecoratorConfig = t.interface({
   declareCommands: t.maybe(t.Function)
 }, { strict: true, name: 'DecoratorConfig' });
 
-const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
+const declareConnect: (decl = {}, config = {}) => (
+  connect(decl, { killProps: ['params', 'query', 'router'], ...config })
+);
+
+const decorator = ({ declareQueries, declareCommands, declareConnect = declareConnect }) => (Component, config = {}) => {
   const {
     connect, queries, commands,
     loadingDecorator = noLoaderLoading, // force a "safety" loader
@@ -65,11 +69,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   return ContainerFactoryWrapper;
 };
 
-const defaultWithConnectOnly = decorator(DecoratorConfig({
-  declareConnect: (decl = {}, config = {}) => (
-    connect(decl, { killProps: ['params', 'query', 'router'], ...config })
-  )
-}));
+const defaultWithConnectOnly = decorator(DecoratorConfig({ declareConnect }));
 
 export default function(...args) {
   return ContainerConfig.is(args[1]) ? defaultWithConnectOnly(...args) : decorator(DecoratorConfig(args[0]))
