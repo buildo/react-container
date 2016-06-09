@@ -1,0 +1,23 @@
+{
+  "name": "react-container",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/buildo/react-container.git"
+  },
+  "keywords": [
+    "react",
+    "container"
+  ],
+  "author": "Giovanni Gonzaga <giovanni@buildo.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/buildo/react-container/issues"
+  },
+  "homepage": "https://github.com/buildo/react-container#readme"
+}
