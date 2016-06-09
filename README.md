@@ -1,5 +1,3 @@
-# usage
-
 ### Import as
 
 ```js
