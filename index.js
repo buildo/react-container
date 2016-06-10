@@ -24,16 +24,16 @@ const DecoratorConfig = t.interface({
   declareCommands: t.maybe(t.Function)
 }, { strict: true, name: 'DecoratorConfig' });
 
-const PublicDecoratorConfig = t.extend(DecoratorConfig, {
+const PublicDecoratorConfig = DecoratorConfig.extend({
   allQueries: t.maybe(t.Object),
   allCommands: t.maybe(t.Object)
 }, { strict: true, name: 'PublicDecoratorConfig' })
 
-const declareConnect: (decl = {}, config = {}) => (
+const defaultDeclareConnect = (decl = {}, config = {}) => (
   _declareConnect(decl, { killProps: ['params', 'query', 'router'], ...config })
 );
 
-const decorator = ({ declareQueries, declareCommands, declareConnect = declareConnect }) => (Component, config = {}) => {
+const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
     connect, queries, commands,
     loadingDecorator = noLoaderLoading, // force a "safety" loader
@@ -76,14 +76,15 @@ const decorator = ({ declareQueries, declareCommands, declareConnect = declareCo
   return ContainerFactoryWrapper;
 };
 
-const defaultWithConnectOnly = decorator(DecoratorConfig({ declareConnect }));
+const defaultWithConnectOnly = decorator(DecoratorConfig({ declareConnect: defaultDeclareConnect }));
 
-export default const = (...args) = t.match(args[0],
-  ContainerConfig, () => defaultWithConnectOnly(...args),
+export default (...args) => t.match(args[0],
+  t.Function, () => defaultWithConnectOnly(...args),
   DecoratorConfig, () => decorator(args[0]),
   PublicDecoratorConfig, () => {
     const {
-      declareQueries as dq, allQueries, declareCommands as dc, allCommands, declareConnect
+      declareQueries: dq, allQueries, declareCommands: dc, allCommands,
+      declareConnect = defaultDeclareConnect
     } = args[0];
     const declareQueries = dq || (allQueries && _declareQueries(allQueries)) || undefined;
     const declareCommands = dc || (allCommands && _declareCommands(allCommands)) || undefined;
