@@ -19,5 +19,15 @@
   "bugs": {
     "url": "https://github.com/buildo/react-container/issues"
   },
-  "homepage": "https://github.com/buildo/react-container#readme"
+  "homepage": "https://github.com/buildo/react-container#readme",
+  "dependencies": {
+    "lodash": "4.13.1",
+    "react-avenger": "github:buildo/react-avenger",
+    "revenge": "0.4.5",
+    "state": "github:buildo/state",
+    "tcomb-react": "0.9.0"
+  },
+  "peerDependencies": {
+    "react": "^0.14"
+  }
 }
