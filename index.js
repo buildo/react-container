@@ -1,5 +1,6 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
+import pickBy from 'lodash/fp/pickBy';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import { t, props } from 'tcomb-react';
@@ -14,6 +15,7 @@ const ContainerConfig = t.interface({
   connect: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
   commands: t.maybe(t.list(t.String)),
+  reduceQueryProps: t.maybe(t.Function),
   mapProps: t.maybe(t.Function),
   __DO_NOT_USE_additionalPropTypes: t.maybe(t.dict(t.String, t.Type))
 }, { strict: true, name: 'ContainerConfig' });
@@ -29,14 +31,22 @@ const PublicDecoratorConfig = DecoratorConfig.extend({
   allCommands: t.maybe(t.Object)
 }, { strict: true, name: 'PublicDecoratorConfig' })
 
+const ReduceQueryPropsReturn = t.interface({
+  accumulator: t.Any,
+  props: t.Object
+}, { strict: true, name: 'ReduceQueryPropsReturn' });
+
 const defaultDeclareConnect = (decl = {}, config = {}) => (
   _declareConnect(decl, { killProps: ['params', 'query', 'router'], ...config })
 );
+
+const defaultReduceQueryProps = (_, newProps) => ({ props: newProps });
 
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
     connect, queries, commands,
     loadingDecorator = noLoaderLoading, // force a "safety" loader
+    reduceQueryProps = defaultReduceQueryProps,
     mapProps,
     __DO_NOT_USE_additionalPropTypes: __props
   } = ContainerConfig(config);
@@ -46,10 +56,10 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const declaredConnect = connect && declareConnect(connect);
   const loader = queries && loadingDecorator;
   const propsTypes = {
+    ...(__props ? __props : {}),
     ...(queries ? declaredQueries.Type : {}),
     ...(commands ? declaredCommands.Type : {}),
-    ...(connect ? declaredConnect.Type : {}),
-    ...(__props ? __props : {})
+    ...(connect ? declaredConnect.Type : {})
   };
   const composedDecorators = flowRight(...compact([
     declaredQueries,
@@ -58,19 +68,38 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     loader
   ]));
 
-  const getLocals = mapProps || pick([
+  const defaultMapProps = pick([
     ...(queries || []),
     ...(commands || []),
     ...Object.keys(connect || {})
   ]);
+
+  const pickQueries = pick([...(queries || [])])
+
+  const getLocals = mapProps || defaultMapProps;
 
   @composedDecorators
   @skinnable(contains(Component))
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component {
+
+    state = {};
+
     static displayName = `${Component.displayName || Component.name || 'Component'}Container`;
-    getLocals = getLocals
+
+    componentWillReceiveProps(newProps) {
+      const rqp = ReduceQueryPropsReturn(
+        reduceQueryProps(this.state.queryPropsAccumulator, newProps)
+      );
+      const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
+      this.setState({
+        queryPropsAccumulator, queryProps: pickQueries(queryProps)
+      });
+    }
+
+    getLocals = props => getLocals({ ...props, ...this.state.queryProps })
+
   }
 
   return ContainerFactoryWrapper;
