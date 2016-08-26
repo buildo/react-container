@@ -90,7 +90,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
 
     componentWillReceiveProps(newProps) {
       const rqp = ReduceQueryPropsReturn(
-        reduceQueryProps(this.state.queryPropsAccumulator, newProps)
+        reduceQueryProps(this.state.queryPropsAccumulator, pickQueries(newProps))
       );
       const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
       this.setState({
