@@ -9,6 +9,7 @@ import _declareConnect from 'state/connect';
 import _declareQueries from 'react-avenger/queries';
 import _declareCommands from 'react-avenger/commands';
 import noLoaderLoading from './noLoaderLoading';
+import displayName from './displayName';
 
 const ContainerConfig = t.interface({
   loadingDecorator: t.maybe(t.Function),
@@ -95,7 +96,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     loader
   ]));
 
-  const defaultMapProps = pick([
+  const getLocals = mapProps || pick([
     ...(queries || []),
     ...(commands || []),
     ...Object.keys(connect || {})
@@ -105,12 +106,9 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   @skinnable(contains(Component))
   @pure
   @props(propsTypes)
-  class ContainerFactoryWrapper extends React.Component {
-
-    static displayName = `${Component.displayName || Component.name || 'Component'}Container`;
-
-    getLocals = mapProps || defaultMapProps;
-
+  class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
+    static displayName = displayName(Component, 'Container');
+    getLocals = getLocals;
   }
 
   return ContainerFactoryWrapper;
