@@ -1,6 +1,5 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
-import pickBy from 'lodash/fp/pickBy';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import { t, props } from 'tcomb-react';
@@ -32,9 +31,12 @@ const PublicDecoratorConfig = DecoratorConfig.extend({
   allCommands: t.maybe(t.Object)
 }, { strict: true, name: 'PublicDecoratorConfig' })
 
-const ReduceQueryPropsReturn = t.interface({
+const reduceQueryPropsReturn = queries => t.interface({
   accumulator: t.Any,
-  props: t.Object
+  props: t.interface(
+    queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
+    { strict: true }
+  )
 }, { strict: true, name: 'ReduceQueryPropsReturn' });
 
 const defaultDeclareConnect = (decl = {}, config = {}) => (
@@ -47,38 +49,44 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const {
     connect, queries, commands,
     loadingDecorator = noLoaderLoading, // force a "safety" loader
-    reduceQueryProps = defaultReduceQueryProps,
+    reduceQueryProps: reduceQueryPropsFn = defaultReduceQueryProps,
     mapProps,
     __DO_NOT_USE_additionalPropTypes: __props
   } = ContainerConfig(config);
 
-  const pickQueries = pick([...(queries || [])])
-
-  const reduceQueryPropsDecorator = Component => (
-    class ReduceQueryPropsWrapper extends React.Component {
-
-      static displayName = `reduceQueryProps(${Component.displayName || Component.name || 'Component'})`;
-
-      state = {};
-
-      componentWillReceiveProps(newProps) {
-        const rqp = ReduceQueryPropsReturn(
-          reduceQueryProps(this.state.queryPropsAccumulator, pickQueries(newProps))
-        );
-        const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
-        this.setState({
-          queryPropsAccumulator, queryProps: pickQueries(queryProps)
-        });
-      }
-
-      render() {
-        return <Component {...{ ...this.props, ...this.state.queryProps }} />;
-      }
-    }
-  );
-
   const declaredQueries = queries && declareQueries(queries);
-  const _reduceQuryProps = queries && reduceQueryPropsDecorator;
+
+  const reduceQueryPropsDecorator = () => {
+    const pickQueries = pick([...(queries || [])]);
+    const ReduceQueryPropsReturn = reduceQueryPropsReturn(queries);
+
+    return Component => (
+      class ReduceQueryPropsWrapper extends React.Component {
+
+        static displayName = displayName(Component, 'reduceQueryProps');
+
+        state = {};
+
+        componentWillReceiveProps(newProps) {
+          const rqp = reduceQueryPropsFn(this.state.queryPropsAccumulator, pickQueries(newProps));
+          t.assert(ReduceQueryPropsReturn.is(rqp), () => `
+            \`queryPropsAccumulator\` should return a \`{ props, accumulator }\` object.
+            \`props\` should conform to declared queries, no additional keys are allowed.
+          `);
+          const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
+          this.setState({
+            queryPropsAccumulator, queryProps
+          });
+        }
+
+        render() {
+          return <Component {...{ ...this.props, ...this.state.queryProps }} />;
+        }
+      }
+    );
+  };
+
+  const reduceQueryProps = queries && reduceQueryPropsDecorator();
   const declaredCommands = commands && declareCommands(commands);
   const declaredConnect = connect && declareConnect(connect);
   const loader = queries && loadingDecorator;
@@ -90,7 +98,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   };
   const composedDecorators = flowRight(...compact([
     declaredQueries,
-    _reduceQuryProps,
+    reduceQueryProps,
     declaredCommands,
     declaredConnect,
     loader
