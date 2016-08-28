@@ -51,7 +51,33 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     __DO_NOT_USE_additionalPropTypes: __props
   } = ContainerConfig(config);
 
+  const pickQueries = pick([...(queries || [])])
+
+  const reduceQueryPropsDecorator = Component => (
+    class ReduceQueryPropsWrapper extends React.Component {
+
+      static displayName = `reduceQueryProps(${Component.displayName || Component.name || 'Component'})`;
+
+      state = {};
+
+      componentWillReceiveProps(newProps) {
+        const rqp = ReduceQueryPropsReturn(
+          reduceQueryProps(this.state.queryPropsAccumulator, pickQueries(newProps))
+        );
+        const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
+        this.setState({
+          queryPropsAccumulator, queryProps: pickQueries(queryProps)
+        });
+      }
+
+      render() {
+        return <Component {...{ ...this.props, ...this.state.queryProps }} />;
+      }
+    }
+  );
+
   const declaredQueries = queries && declareQueries(queries);
+  const _reduceQuryProps = queries && reduceQueryPropsDecorator;
   const declaredCommands = commands && declareCommands(commands);
   const declaredConnect = connect && declareConnect(connect);
   const loader = queries && loadingDecorator;
@@ -63,6 +89,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   };
   const composedDecorators = flowRight(...compact([
     declaredQueries,
+    _reduceQuryProps,
     declaredCommands,
     declaredConnect,
     loader
@@ -74,31 +101,15 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     ...Object.keys(connect || {})
   ]);
 
-  const pickQueries = pick([...(queries || [])])
-
-  const getLocals = mapProps || defaultMapProps;
-
   @composedDecorators
   @skinnable(contains(Component))
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component {
 
-    state = {};
-
     static displayName = `${Component.displayName || Component.name || 'Component'}Container`;
 
-    componentWillReceiveProps(newProps) {
-      const rqp = ReduceQueryPropsReturn(
-        reduceQueryProps(this.state.queryPropsAccumulator, pickQueries(newProps))
-      );
-      const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
-      this.setState({
-        queryPropsAccumulator, queryProps: pickQueries(queryProps)
-      });
-    }
-
-    getLocals = props => getLocals({ ...props, ...this.state.queryProps })
+    getLocals = mapProps || defaultMapProps;
 
   }
 
