@@ -43,13 +43,11 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
   _declareConnect(decl, { killProps: ['params', 'query', 'router'], ...config })
 );
 
-const defaultReduceQueryProps = (_, newProps) => ({ props: newProps });
-
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
     connect, queries, commands,
     loadingDecorator = noLoaderLoading, // force a "safety" loader
-    reduceQueryProps: reduceQueryPropsFn = defaultReduceQueryProps,
+    reduceQueryProps: reduceQueryPropsFn,
     mapProps,
     __DO_NOT_USE_additionalPropTypes: __props
   } = ContainerConfig(config);
@@ -86,7 +84,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     );
   };
 
-  const reduceQueryProps = queries && reduceQueryPropsDecorator();
+  const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator();
   const declaredCommands = commands && declareCommands(commands);
   const declaredConnect = connect && declareConnect(connect);
   const loader = queries && loadingDecorator;
