@@ -12,6 +12,7 @@ import loadingData from 'react-avenger/lib/loading-data';
 import displayName from './displayName';
 
 const ContainerConfig = t.interface({
+  renderAnyway: t.maybe(t.Boolean),
   connect: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
   commands: t.maybe(t.list(t.String)),
@@ -45,6 +46,7 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
+    renderAnyway = false,
     connect, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
@@ -114,10 +116,13 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
     static displayName = displayName(Component, 'Container');
     getLocals({ __status, ...props }) {
-      if (__status && __status === 'isFetching') {
+      if (__status && __status === 'isFetching' && !renderAnyway) {
         return { __status };
       } else {
-        return getLocals(props);
+        return {
+          ...getLocals(props),
+          __status
+        };
       }
     }
   }
