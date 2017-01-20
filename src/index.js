@@ -17,7 +17,7 @@ const ContainerConfig = t.interface({
   commands: t.maybe(t.list(t.String)),
   reduceQueryProps: t.maybe(t.Function),
   mapProps: t.maybe(t.Function),
-  __DO_NOT_USE_additionalPropTypes: t.maybe(t.dict(t.String, t.Type))
+  propTypes: t.maybe(t.dict(t.String, t.Type))
 }, { strict: true, name: 'ContainerConfig' });
 
 const DecoratorConfig = t.interface({
@@ -49,7 +49,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     loadingDecorator = noLoaderLoading, // force a "safety" loader
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
-    __DO_NOT_USE_additionalPropTypes: __props
+    propTypes: __props
   } = ContainerConfig(config);
 
   const declaredQueries = queries && declareQueries(queries);
