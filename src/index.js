@@ -29,7 +29,7 @@ const DecoratorConfig = t.interface({
 const PublicDecoratorConfig = DecoratorConfig.extend({
   allQueries: t.maybe(t.Object),
   allCommands: t.maybe(t.Object)
-}, { strict: true, name: 'PublicDecoratorConfig' })
+}, { strict: true, name: 'PublicDecoratorConfig' });
 
 const reduceQueryPropsReturn = queries => t.interface({
   accumulator: t.Any,
