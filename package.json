@@ -22,10 +22,10 @@
   },
   "homepage": "https://github.com/buildo/react-container#readme",
   "dependencies": {
-    "lodash": "4.13.1",
-    "react-avenger": "github:buildo/react-avenger",
+    "lodash": "^4.17.4",
+    "react-avenger": "github:buildo/react-avenger#v0.2.0",
     "revenge": "0.4.5",
-    "state": "github:buildo/state",
+    "state": "github:buildo/state#v0.1.1",
     "tcomb-react": "0.9.0"
   },
   "peerDependencies": {
