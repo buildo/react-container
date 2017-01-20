@@ -1,5 +1,6 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
+import omit from 'lodash/omit';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import { t, props } from 'tcomb-react';
@@ -90,8 +91,9 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const declaredConnect = connect && declareConnect(connect);
   const loader = queries && loadingData;
   const propsTypes = {
+    ...(loader ? { __status: t.String } : {}),
     ...(__props ? __props : {}),
-    ...(queries ? declaredQueries.Type : {}),
+    ...(queries ? omit(declaredQueries.Type, 'readyState') : {}),
     ...(commands ? declaredCommands.Type : {}),
     ...(connect ? declaredConnect.Type : {})
   };
