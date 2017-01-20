@@ -1,6 +1,6 @@
 {
   "name": "buildo-react-container",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "helper to build container components (connected to state, queries, commands)",
   "main": "src/index.js",
   "scripts": {
