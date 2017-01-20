@@ -1,10 +1,11 @@
 {
   "name": "react-container",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "description": "helper to build container components (connected to state, queries, commands)",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint src"
   },
   "repository": {
     "type": "git",
@@ -15,7 +16,7 @@
     "container"
   ],
   "author": "Giovanni Gonzaga <giovanni@buildo.io>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/buildo/react-container/issues"
   },
@@ -28,6 +29,11 @@
     "tcomb-react": "0.9.0"
   },
   "peerDependencies": {
-    "react": "^0.14"
+    "react": "0.14 || 15"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.1.1",
+    "eslint": "^3.13.1",
+    "eslint-config-buildo": "^0.2.0"
   }
 }
