@@ -120,7 +120,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     getLocals({ __status, ...props }) {
       if (__status && __status === 'isFetching' && !renderAnyway) {
         return { __status };
-      } else if (loader && _status) {
+      } else if (loader && __status) {
         return { ...getLocals(props), __status };
       } else {
         return getLocals(props);
