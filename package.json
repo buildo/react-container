@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "release-version": "smooth-release"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
   "devDependencies": {
     "babel-eslint": "^7.1.1",
     "eslint": "^3.13.1",
-    "eslint-config-buildo": "^0.2.0"
+    "eslint-config-buildo": "^0.2.0",
+    "smooth-release": "^6.0.0"
   }
 }
