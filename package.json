@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src",
-    "release-version": "smooth-release"
+    "release-version": "smooth-release",
+    "preversion": "npm run lint"
   },
   "repository": {
     "type": "git",
