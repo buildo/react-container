@@ -2,12 +2,14 @@
   "name": "buildo-react-container",
   "version": "0.1.2",
   "description": "helper to build container components (connected to state, queries, commands)",
-  "main": "src/index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src",
     "release-version": "smooth-release",
-    "preversion": "npm run lint"
+    "preversion": "npm run lint",
+    "prepublish": "npm run build",
+    "build": "rm -rf lib && mkdir lib && babel src -d lib"
   },
   "repository": {
     "type": "git",
@@ -34,7 +36,14 @@
     "react": "0.14 || 15"
   },
   "devDependencies": {
+    "babel-cli": "^6.22.2",
     "babel-eslint": "^7.1.1",
+    "babel-plugin-transform-class-properties": "^6.22.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-es2015-classes": "^6.22.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-react": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0",
     "eslint": "^3.13.1",
     "eslint-config-buildo": "^0.2.0",
     "smooth-release": "^6.0.0"
