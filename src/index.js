@@ -3,23 +3,17 @@ import pick from 'lodash/fp/pick';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import every from 'lodash/every';
-// import some from 'lodash/some';
-import map from 'lodash/map';
 import { t, props } from 'tcomb-react';
-import { skinnable, pure } from 'revenge';
+import { skinnable, pure, contains } from 'revenge';
 import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import displayName from './displayName';
 
-// const _isLoading = ({ readyState }) => {
-//   return some(map(readyState, rs => rs.loading));
-// };
-
-const _isFetched = ({ readyState, ...props }) => {
-  return every(map(readyState, (rs, k) => (
+const isFetched = ({ readyState, ...props }) => {
+  return every(readyState, (rs, k) => (
     props[k] !== void 0 && typeof rs.error === 'undefined'
-  )));
+  ));
 };
 
 const ContainerConfig = t.interface({
@@ -120,27 +114,20 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   ]);
 
   @composedDecorators
-  @skinnable()
+  @skinnable(contains(Component))
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
     static displayName = displayName(Component, 'Container');
     getLocals(props) {
-      // const isLoading = _isLoading(props);
-      const isFetched = _isFetched(props);
-      const notReady = !isFetched && waitForQueryProps;
-      // const isReadyAndLoading = isReady && isLoading;
-      // const isReadyAndNotLoading = isReady && !isLoading;
+      const notReady = !isFetched(props) && waitForQueryProps;
       if (notReady) {
-        return false;
+        return props;
       } else {
         return getLocals(props);
       }
     }
 
-    template(props) {
-      return props === false ? null : <Component {...props} />;
-    }
   }
 
   return ContainerFactoryWrapper;
