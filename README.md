@@ -1,7 +1,7 @@
 ### Import as
 
 ```js
-import container from 'react-container'
+import container from 'buildo-react-container'
 ```
 
 ### All the following should be valid usage examples
