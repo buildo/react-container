@@ -125,9 +125,9 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
     static displayName = displayName(Component, 'Container');
-    getLocals({ readyState = {}, ...props }) {
-      // const isLoading = _isLoading({ readyState });
-      const isFetched = _isFetched({ readyState, ...props });
+    getLocals(props) {
+      // const isLoading = _isLoading(props);
+      const isFetched = _isFetched(props);
       const notReady = !isFetched && waitForQueryProps;
       // const isReadyAndLoading = isReady && isLoading;
       // const isReadyAndNotLoading = isReady && !isLoading;
