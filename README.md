@@ -64,7 +64,7 @@ export default containerFactory(MyComponent, {
 })
 ```
 
-### if you need to add additional prop types
+### If you need to add additional prop types...
 
 (other than the ones derived from queries/commands/connect)
 
