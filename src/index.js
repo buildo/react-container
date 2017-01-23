@@ -2,13 +2,25 @@ import React from 'react';
 import pick from 'lodash/fp/pick';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
+import every from 'lodash/every';
+// import some from 'lodash/some';
+import map from 'lodash/map';
 import { t, props } from 'tcomb-react';
-import { skinnable, pure, contains } from 'revenge';
+import { skinnable, pure } from 'revenge';
 import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
-import noLoaderLoading from './noLoaderLoading';
 import displayName from './displayName';
+
+// const _isLoading = ({ readyState }) => {
+//   return some(map(readyState, rs => rs.loading));
+// };
+
+const _isFetched = ({ readyState, ...props }) => {
+  return every(map(readyState, (rs, k) => (
+    props[k] !== void 0 && typeof rs.error === 'undefined'
+  )));
+};
 
 const ContainerConfig = t.interface({
   loadingDecorator: t.maybe(t.Function),
@@ -46,7 +58,6 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
     connect, queries, commands,
-    loadingDecorator = noLoaderLoading, // force a "safety" loader
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
     propTypes: __props
@@ -87,7 +98,6 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator();
   const declaredCommands = commands && declareCommands(commands);
   const declaredConnect = connect && declareConnect(connect);
-  const loader = queries && loadingDecorator;
   const propsTypes = {
     ...(__props ? __props : {}),
     ...(queries ? declaredQueries.Type : {}),
@@ -98,8 +108,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     declaredQueries,
     reduceQueryProps,
     declaredCommands,
-    declaredConnect,
-    loader
+    declaredConnect
   ]));
 
   const getLocals = mapProps || pick([
@@ -109,12 +118,27 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   ]);
 
   @composedDecorators
-  @skinnable(contains(Component))
+  @skinnable()
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
     static displayName = displayName(Component, 'Container');
-    getLocals = getLocals;
+    getLocals({ readyState = {}, ...props }) {
+      // const isLoading = _isLoading({ readyState });
+      const isFetched = _isFetched({ readyState, ...props });
+      const notReady = !isFetched;
+      // const isReadyAndLoading = isReady && isLoading;
+      // const isReadyAndNotLoading = isReady && !isLoading;
+      if (notReady) {
+        return false;
+      } else {
+        return getLocals(props);
+      }
+    }
+
+    template(props) {
+      return props === false ? null : <Component {...props} />;
+    }
   }
 
   return ContainerFactoryWrapper;
