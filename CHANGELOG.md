@@ -2,6 +2,13 @@
 
 
 
+## [v0.4.1](https://github.com/buildo/react-container/tree/v0.4.1) (2017-01-23)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.4.0...v0.4.1)
+
+#### New features:
+
+- update react-avenger version [#18](https://github.com/buildo/react-container/issues/18)
+
 ## [v0.4.0](https://github.com/buildo/react-container/tree/v0.4.0) (2017-01-23)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.3.0...v0.4.0)
 
