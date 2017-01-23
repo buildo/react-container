@@ -1,5 +1,6 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
+import omit from 'lodash/omit';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import { t, props } from 'tcomb-react';
@@ -8,10 +9,11 @@ import _declareConnect from 'state/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import noLoaderLoading from './noLoaderLoading';
+import loadingData from 'react-avenger/lib/loading-data';
 import displayName from './displayName';
 
 const ContainerConfig = t.interface({
-  loadingDecorator: t.maybe(t.Function),
+  renderAnyway: t.maybe(t.Boolean),
   connect: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
   commands: t.maybe(t.list(t.String)),
@@ -45,8 +47,8 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
+    renderAnyway = false,
     connect, queries, commands,
-    loadingDecorator = noLoaderLoading, // force a "safety" loader
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
     propTypes: __props
@@ -87,10 +89,11 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator();
   const declaredCommands = commands && declareCommands(commands);
   const declaredConnect = connect && declareConnect(connect);
-  const loader = queries && loadingDecorator;
+  const loader = queries && loadingData;
   const propsTypes = {
+    ...(loader ? { __status: t.String } : {}),
     ...(__props ? __props : {}),
-    ...(queries ? declaredQueries.Type : {}),
+    ...(queries ? omit(declaredQueries.Type, 'readyState') : {}),
     ...(commands ? declaredCommands.Type : {}),
     ...(connect ? declaredConnect.Type : {})
   };
@@ -114,7 +117,15 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
     static displayName = displayName(Component, 'Container');
-    getLocals = getLocals;
+    getLocals({ __status, ...props }) {
+      if (__status && __status === 'isFetching' && !renderAnyway) {
+        return { __status };
+      } else if (loader && __status) {
+        return { ...getLocals(props), __status };
+      } else {
+        return getLocals(props);
+      }
+    }
   }
 
   return ContainerFactoryWrapper;
