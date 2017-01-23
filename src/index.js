@@ -23,6 +23,7 @@ const _isFetched = ({ readyState, ...props }) => {
 };
 
 const ContainerConfig = t.interface({
+  waitForQueryProps: t.maybe(t.Boolean),
   loadingDecorator: t.maybe(t.Function),
   connect: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
@@ -57,6 +58,7 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
+    waitForQueryProps = true,
     connect, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
@@ -126,7 +128,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     getLocals({ readyState = {}, ...props }) {
       // const isLoading = _isLoading({ readyState });
       const isFetched = _isFetched({ readyState, ...props });
-      const notReady = !isFetched;
+      const notReady = !isFetched && waitForQueryProps;
       // const isReadyAndLoading = isReady && isLoading;
       // const isReadyAndNotLoading = isReady && !isLoading;
       if (notReady) {
