@@ -2,6 +2,14 @@
 
 
 
+## [v0.4.0](https://github.com/buildo/react-container/tree/v0.4.0) (2017-01-23)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.3.0...v0.4.0)
+
+#### Breaking:
+
+- update to versioned `buildo-state` [#16](https://github.com/buildo/react-container/issues/16)
+- replace `__DO_NOT_USE_additionalPropTypes` with `propTypes` [#7](https://github.com/buildo/react-container/issues/7)
+
 ## [v0.3.0](https://github.com/buildo/react-container/tree/v0.3.0) (2017-01-23)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.2.1...v0.3.0)
 
