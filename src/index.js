@@ -9,6 +9,7 @@ import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import displayName from './displayName';
+import noLoaderLoading from './noLoaderLoading';
 
 const isFetched = ({ readyState, ...props }) => {
   return every(readyState, (rs, k) => (
@@ -53,6 +54,7 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
     waitForQueryProps = true,
+    loadingDecorator = noLoaderLoading,
     connect, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
@@ -114,7 +116,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   ]);
 
   @composedDecorators
-  @skinnable(contains(Component))
+  @skinnable(contains(loadingDecorator(Component)))
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
@@ -124,7 +126,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
       if (notReady) {
         return props;
       } else {
-        return getLocals(props);
+        return { ...getLocals(props), readyState: props.readyState };
       }
     }
 
