@@ -5,8 +5,8 @@ import flowRight from 'lodash/flowRight';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
 import _declareConnect from 'state/connect';
-import _declareQueries from 'react-avenger/queries';
-import _declareCommands from 'react-avenger/commands';
+import _declareQueries from 'react-avenger/lib/queries';
+import _declareCommands from 'react-avenger/lib/commands';
 import noLoaderLoading from './noLoaderLoading';
 import displayName from './displayName';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import loading from 'react-avenger/loading';
+import loading from 'react-avenger/lib/loading';
 
 class NoWrapper extends React.Component {
   render() {
