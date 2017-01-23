@@ -2,6 +2,13 @@
 
 
 
+## [v0.2.1](https://github.com/buildo/react-container/tree/v0.2.1) (2017-01-23)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.2.0...v0.2.1)
+
+#### New features:
+
+- do not push to npm `.babelrc` to avoid possible issues with different babel versions [#12](https://github.com/buildo/react-container/issues/12)
+
 ## [v0.2.0](https://github.com/buildo/react-container/tree/v0.2.0) (2017-01-23)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.1.2...v0.2.0)
 
