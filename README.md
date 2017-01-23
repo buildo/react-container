@@ -63,3 +63,14 @@ export default containerFactory(MyComponent, {
   /* container cfg */
 })
 ```
+
+### if you need to add additional prop types
+
+(other than the ones derived from queries/commands/connect)
+
+```js
+export default container(MyComponent, {
+  propTypes: { myProp: MyType },
+  // ...
+});
+```
