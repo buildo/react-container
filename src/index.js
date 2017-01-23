@@ -4,7 +4,7 @@ import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
-import _declareConnect from 'state/connect';
+import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import noLoaderLoading from './noLoaderLoading';
