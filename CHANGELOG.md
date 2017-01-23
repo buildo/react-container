@@ -2,6 +2,13 @@
 
 
 
+## [v0.2.0](https://github.com/buildo/react-container/tree/v0.2.0) (2017-01-23)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.1.2...v0.2.0)
+
+#### Breaking:
+
+- add a build step [#10](https://github.com/buildo/react-container/issues/10)
+
 ## [v0.1.2](https://github.com/buildo/react-container/tree/v0.1.2) (2017-01-20)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.1.1...v0.1.2)
 
