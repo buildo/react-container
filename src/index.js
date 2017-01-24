@@ -1,7 +1,9 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
+import omitF from 'lodash/fp/omit';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
+import isUndefined from 'lodash/isUndefined';
 import every from 'lodash/every';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
@@ -16,6 +18,8 @@ const isFetched = ({ readyState, ...props }) => {
     props[k] !== void 0 && typeof rs.error === 'undefined'
   ));
 };
+
+const stripUndef = omitF(isUndefined);
 
 const ContainerConfig = t.interface({
   waitForQueryProps: t.maybe(t.Boolean),
@@ -41,10 +45,12 @@ const PublicDecoratorConfig = DecoratorConfig.extend({
 
 const reduceQueryPropsReturn = queries => t.interface({
   accumulator: t.Any,
-  props: t.interface(
-    queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
-    { strict: true }
-  )
+  props: t.interface({
+    ...queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
+    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: t.interface({
+      waiting: t.Boolean, fetching: t.Boolean, loading: t.Boolean, error: t.maybe(t.Any), ready: t.maybe(t.Boolean)
+    }) }), {}), { strict: true })
+  }, { strict: true })
 }, { strict: true, name: 'ReduceQueryPropsReturn' });
 
 const defaultDeclareConnect = (decl = {}, config = {}) => (
@@ -64,7 +70,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const declaredQueries = queries && declareQueries(queries);
 
   const reduceQueryPropsDecorator = () => {
-    const pickQueries = pick([...(queries || [])]);
+    const pickQueriesAndReadyState = pick([...(queries || []), 'readyState']);
     const ReduceQueryPropsReturn = reduceQueryPropsReturn(queries);
 
     return Component => (
@@ -75,10 +81,10 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
         state = {};
 
         componentWillReceiveProps(newProps) {
-          const rqp = reduceQueryPropsFn(this.state.queryPropsAccumulator, pickQueries(newProps));
+          const rqp = reduceQueryPropsFn(this.state.queryPropsAccumulator, pickQueriesAndReadyState(newProps));
           t.assert(ReduceQueryPropsReturn.is(rqp), () => `
-            \`queryPropsAccumulator\` should return a \`{ props, accumulator }\` object.
-            \`props\` should conform to declared queries, no additional keys are allowed.
+            \`reduceQueryProps\` function should return a \`{ props, accumulator }\` object.
+            \`props\` should conform to declared queries plus \`readyState\`, no additional keys are allowed.
           `);
           const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
           this.setState({
@@ -120,13 +126,16 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
+
     static displayName = displayName(Component, 'Container');
+
     getLocals(props) {
       const notReady = !isFetched(props) && waitForQueryProps;
+      const { readyState } = props;
       if (notReady) {
-        return props;
+        return stripUndef({ readyState });
       } else {
-        return { ...getLocals(props), readyState: props.readyState };
+        return { ...getLocals(props), ...stripUndef({ readyState }) };
       }
     }
 
