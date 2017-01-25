@@ -9,9 +9,8 @@ import { skinnable, pure, contains } from 'revenge';
 import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
-import { defaultIsReady } from 'react-avenger/lib/loading';
+import { defaultIsReady, noLoaderLoading } from 'react-avenger/lib/loading';
 import displayName from './displayName';
-import noLoaderLoading from './noLoaderLoading';
 
 const stripUndef = omitF(isUndefined);
 
