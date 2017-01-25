@@ -4,25 +4,19 @@ import omitF from 'lodash/fp/omit';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import isUndefined from 'lodash/isUndefined';
-import every from 'lodash/every';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
 import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
+import { defaultIsReady } from 'react-avenger/lib/loading';
 import displayName from './displayName';
 import noLoaderLoading from './noLoaderLoading';
-
-const isFetched = ({ readyState, ...props }) => {
-  return every(readyState, (rs, k) => (
-    props[k] !== void 0 && typeof rs.error === 'undefined'
-  ));
-};
 
 const stripUndef = omitF(isUndefined);
 
 const ContainerConfig = t.interface({
-  waitForQueryProps: t.maybe(t.Boolean),
+  isReady: t.maybe(t.Function),
   loadingDecorator: t.maybe(t.Function),
   connect: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
@@ -59,7 +53,7 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
-    waitForQueryProps = true,
+    isReady = defaultIsReady,
     loadingDecorator = noLoaderLoading,
     connect, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
@@ -130,12 +124,11 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     static displayName = displayName(Component, 'Container');
 
     getLocals(props) {
-      const notReady = !isFetched(props) && waitForQueryProps;
       const { readyState } = props;
-      if (notReady) {
-        return stripUndef({ readyState });
-      } else {
+      if (isReady(props)) {
         return { ...getLocals(props), ...stripUndef({ readyState }) };
+      } else {
+        return stripUndef({ readyState });
       }
     }
 
