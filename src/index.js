@@ -11,6 +11,7 @@ import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import { defaultIsReady } from 'react-avenger/lib/loading';
 import displayName from './displayName';
+import reduceQueryPropsDecorator from './reduceQueryPropsDecorator';
 
 const stripUndef = omitByF(isUndefined);
 
@@ -35,18 +36,6 @@ const PublicDecoratorConfig = DecoratorConfig.extend({
   allCommands: t.maybe(t.Object)
 }, { strict: true, name: 'PublicDecoratorConfig' });
 
-const ReadyState = t.interface({
-  waiting: t.Boolean, fetching: t.Boolean, loading: t.Boolean, error: t.maybe(t.Any), ready: t.Boolean
-}, { strict: true, name: 'ReadyState' });
-
-const reduceQueryPropsReturn = queries => t.interface({
-  accumulator: t.Any,
-  props: t.interface({
-    ...queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
-    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: ReadyState }), {}), { strict: true, name: 'ReadyStates' })
-  }, { strict: true, name: 'QueriesProps' })
-}, { strict: true, name: 'ReduceQueryPropsReturn' });
-
 const defaultDeclareConnect = (decl = {}, config = {}) => (
   _declareConnect(decl, { killProps: ['params', 'query', 'router'], ...config })
 );
@@ -61,40 +50,10 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   } = ContainerConfig(config);
 
   const declaredQueries = queries && declareQueries(queries);
-
-  const reduceQueryPropsDecorator = () => {
-    const pickQueriesAndReadyState = pick([...(queries || []), 'readyState']);
-    const ReduceQueryPropsReturn = reduceQueryPropsReturn(queries);
-
-    return Component => (
-      class ReduceQueryPropsWrapper extends React.Component {
-
-        static displayName = displayName(Component, 'reduceQueryProps');
-
-        state = {};
-
-        componentWillReceiveProps(newProps) {
-          const rqp = reduceQueryPropsFn(this.state.queryPropsAccumulator, pickQueriesAndReadyState(newProps));
-          t.assert(ReduceQueryPropsReturn.is(rqp), () => `
-            \`reduceQueryProps\` function should return a \`{ props, accumulator }\` object.
-            \`props\` should conform to declared queries plus \`readyState\`, no additional keys are allowed.
-          `);
-          const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
-          this.setState({
-            queryPropsAccumulator, queryProps
-          });
-        }
-
-        render() {
-          return <Component {...{ ...this.props, ...this.state.queryProps }} />;
-        }
-      }
-    );
-  };
-
-  const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator();
   const declaredCommands = commands && declareCommands(commands);
   const declaredConnect = connect && declareConnect(connect);
+  const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator({ queries, reducer: reduceQueryPropsFn });
+
   const propsTypes = {
     ...(__props ? __props : {}),
     ...(queries ? declaredQueries.Type : {}),
