@@ -36,14 +36,16 @@ const PublicDecoratorConfig = DecoratorConfig.extend({
   allCommands: t.maybe(t.Object)
 }, { strict: true, name: 'PublicDecoratorConfig' });
 
+const ReadyState = t.interface({
+  waiting: t.Boolean, fetching: t.Boolean, loading: t.Boolean, error: t.maybe(t.Any), ready: t.Boolean
+}, { strict: true, name: 'ReadyState' });
+
 const reduceQueryPropsReturn = queries => t.interface({
   accumulator: t.Any,
   props: t.interface({
     ...queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
-    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: t.interface({
-      waiting: t.Boolean, fetching: t.Boolean, loading: t.Boolean, error: t.maybe(t.Any), ready: t.maybe(t.Boolean)
-    }) }), {}), { strict: true })
-  }, { strict: true })
+    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: ReadyState }), {}), { strict: true })
+  }, { strict: true, name: 'ReadyStates' })
 }, { strict: true, name: 'ReduceQueryPropsReturn' });
 
 const defaultDeclareConnect = (decl = {}, config = {}) => (
