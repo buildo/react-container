@@ -44,8 +44,8 @@ const reduceQueryPropsReturn = queries => t.interface({
   accumulator: t.Any,
   props: t.interface({
     ...queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
-    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: ReadyState }), {}), { strict: true })
-  }, { strict: true, name: 'ReadyStates' })
+    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: ReadyState }), {}), { strict: true, name: 'ReadyStates' })
+  }, { strict: true, name: 'QueriesProps' })
 }, { strict: true, name: 'ReduceQueryPropsReturn' });
 
 const defaultDeclareConnect = (decl = {}, config = {}) => (
