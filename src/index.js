@@ -1,6 +1,6 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
-import omitF from 'lodash/fp/omit';
+import omitByF from 'lodash/fp/omitBy';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import isUndefined from 'lodash/isUndefined';
@@ -12,7 +12,7 @@ import _declareCommands from 'react-avenger/lib/commands';
 import { defaultIsReady, noLoaderLoading } from 'react-avenger/lib/loading';
 import displayName from './displayName';
 
-const stripUndef = omitF(isUndefined);
+const stripUndef = omitByF(isUndefined);
 
 const ContainerConfig = t.interface({
   isReady: t.maybe(t.Function),
@@ -125,7 +125,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     getLocals(props) {
       const { readyState } = props;
       if (isReady(props)) {
-        return { ...getLocals(props), ...stripUndef({ readyState }) };
+        return { ...stripUndef({ readyState }), ...getLocals(props) };
       } else {
         return stripUndef({ readyState });
       }
