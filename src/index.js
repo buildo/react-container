@@ -126,7 +126,9 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
 
     getLocals(props) {
       const { readyState } = props;
-      if (isReady(props)) {
+      if (!readyState) {
+        return getLocals(props);
+      } else if (isReady(props)) {
         return { ...stripUndef({ readyState }), ...getLocals(props) };
       } else {
         return stripUndef({ readyState });
