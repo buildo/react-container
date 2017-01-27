@@ -2,6 +2,18 @@
 
 
 
+## [v0.5.0](https://github.com/buildo/react-container/tree/v0.5.0) (2017-01-27)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.4.1...v0.5.0)
+
+#### New features:
+
+- move reduceQueryProps decorator to its own file [#23](https://github.com/buildo/react-container/issues/23)
+
+#### Breaking:
+
+- remove loading decorator  [#21](https://github.com/buildo/react-container/issues/21)
+- loading decorator should be attached to the UI component [#4](https://github.com/buildo/react-container/issues/4)
+
 ## [v0.4.1](https://github.com/buildo/react-container/tree/v0.4.1) (2017-01-23)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.4.0...v0.4.1)
 
