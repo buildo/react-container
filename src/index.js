@@ -1,16 +1,21 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
+import omitByF from 'lodash/fp/omitBy';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
+import isUndefined from 'lodash/isUndefined';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
 import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
-import noLoaderLoading from './noLoaderLoading';
+import { defaultIsReady, noLoaderLoading } from 'react-avenger/lib/loading';
 import displayName from './displayName';
 
+const stripUndef = omitByF(isUndefined);
+
 const ContainerConfig = t.interface({
+  isReady: t.maybe(t.Function),
   loadingDecorator: t.maybe(t.Function),
   connect: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
@@ -31,12 +36,16 @@ const PublicDecoratorConfig = DecoratorConfig.extend({
   allCommands: t.maybe(t.Object)
 }, { strict: true, name: 'PublicDecoratorConfig' });
 
+const ReadyState = t.interface({
+  waiting: t.Boolean, fetching: t.Boolean, loading: t.Boolean, error: t.maybe(t.Any), ready: t.Boolean
+}, { strict: true, name: 'ReadyState' });
+
 const reduceQueryPropsReturn = queries => t.interface({
   accumulator: t.Any,
-  props: t.interface(
-    queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
-    { strict: true }
-  )
+  props: t.interface({
+    ...queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
+    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: ReadyState }), {}), { strict: true, name: 'ReadyStates' })
+  }, { strict: true, name: 'QueriesProps' })
 }, { strict: true, name: 'ReduceQueryPropsReturn' });
 
 const defaultDeclareConnect = (decl = {}, config = {}) => (
@@ -45,8 +54,9 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
+    isReady = defaultIsReady,
+    loadingDecorator = noLoaderLoading,
     connect, queries, commands,
-    loadingDecorator = noLoaderLoading, // force a "safety" loader
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
     propTypes: __props
@@ -55,7 +65,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const declaredQueries = queries && declareQueries(queries);
 
   const reduceQueryPropsDecorator = () => {
-    const pickQueries = pick([...(queries || [])]);
+    const pickQueriesAndReadyState = pick([...(queries || []), 'readyState']);
     const ReduceQueryPropsReturn = reduceQueryPropsReturn(queries);
 
     return Component => (
@@ -66,10 +76,10 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
         state = {};
 
         componentWillReceiveProps(newProps) {
-          const rqp = reduceQueryPropsFn(this.state.queryPropsAccumulator, pickQueries(newProps));
+          const rqp = reduceQueryPropsFn(this.state.queryPropsAccumulator, pickQueriesAndReadyState(newProps));
           t.assert(ReduceQueryPropsReturn.is(rqp), () => `
-            \`queryPropsAccumulator\` should return a \`{ props, accumulator }\` object.
-            \`props\` should conform to declared queries, no additional keys are allowed.
+            \`reduceQueryProps\` function should return a \`{ props, accumulator }\` object.
+            \`props\` should conform to declared queries plus \`readyState\`, no additional keys are allowed.
           `);
           const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
           this.setState({
@@ -87,7 +97,6 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator();
   const declaredCommands = commands && declareCommands(commands);
   const declaredConnect = connect && declareConnect(connect);
-  const loader = queries && loadingDecorator;
   const propsTypes = {
     ...(__props ? __props : {}),
     ...(queries ? declaredQueries.Type : {}),
@@ -98,8 +107,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     declaredQueries,
     reduceQueryProps,
     declaredCommands,
-    declaredConnect,
-    loader
+    declaredConnect
   ]));
 
   const getLocals = mapProps || pick([
@@ -109,12 +117,24 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   ]);
 
   @composedDecorators
-  @skinnable(contains(Component))
+  @skinnable(contains(loadingDecorator(Component)))
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
+
     static displayName = displayName(Component, 'Container');
-    getLocals = getLocals;
+
+    getLocals(props) {
+      const { readyState } = props;
+      if (!readyState) {
+        return getLocals(props);
+      } else if (isReady(props)) {
+        return { ...stripUndef({ readyState }), ...getLocals(props) };
+      } else {
+        return stripUndef({ readyState });
+      }
+    }
+
   }
 
   return ContainerFactoryWrapper;
