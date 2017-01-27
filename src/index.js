@@ -84,9 +84,13 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     getLocals(props) {
       const { readyState } = props;
       if (!readyState) {
+        // this means there are no `queries` defined
         return getLocals(props);
       } else if (isReady(props)) {
-        return { ...stripUndef({ readyState }), ...getLocals(props) };
+        const locals = getLocals(props);
+        // this is needed to support the possible `return null`
+        // from `skinnable(contains(Component)).getLocals`
+        return locals === null ? locals : { ...stripUndef({ readyState }), ...locals };
       } else {
         return stripUndef({ readyState });
       }
