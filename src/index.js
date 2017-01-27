@@ -9,14 +9,13 @@ import { skinnable, pure, contains } from 'revenge';
 import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
-import { defaultIsReady, noLoaderLoading } from 'react-avenger/lib/loading';
+import { defaultIsReady } from 'react-avenger/lib/loading';
 import displayName from './displayName';
 
 const stripUndef = omitByF(isUndefined);
 
 const ContainerConfig = t.interface({
   isReady: t.maybe(t.Function),
-  loadingDecorator: t.maybe(t.Function),
   connect: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
   commands: t.maybe(t.list(t.String)),
@@ -55,7 +54,6 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
     isReady = defaultIsReady,
-    loadingDecorator = noLoaderLoading,
     connect, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
@@ -117,7 +115,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   ]);
 
   @composedDecorators
-  @skinnable(contains(loadingDecorator(Component)))
+  @skinnable(contains(Component))
   @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
