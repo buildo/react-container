@@ -4,7 +4,7 @@ import displayName from './displayName';
 import { t } from 'tcomb-react';
 
 const ReadyState = t.interface({
-  waiting: t.Boolean, fetching: t.Boolean, loading: t.Boolean, error: t.maybe(t.Any), ready: t.Boolean
+  loading: t.Boolean, ready: t.Boolean
 }, { strict: true, name: 'ReadyState' });
 
 const reduceQueryPropsReturn = (queries) => t.interface({
