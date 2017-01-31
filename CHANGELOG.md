@@ -2,6 +2,13 @@
 
 
 
+## [v0.6.0](https://github.com/buildo/react-container/tree/v0.6.0) (2017-01-31)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.5.1...v0.6.0)
+
+#### Breaking:
+
+- reduceQueryPropsDecorator: support last avenger readyState api [#27](https://github.com/buildo/react-container/issues/27)
+
 ## [v0.5.1](https://github.com/buildo/react-container/tree/v0.5.1) (2017-01-27)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.5.0...v0.5.1)
 
