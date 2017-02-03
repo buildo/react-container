@@ -1,4 +1,6 @@
 import React from 'react';
+import difference from 'lodash/difference';
+import omit from 'lodash/fp/omit';
 import pick from 'lodash/fp/pick';
 import omitByF from 'lodash/fp/omitBy';
 import compact from 'lodash/compact';
@@ -50,21 +52,35 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   } = ContainerConfig(config);
 
   const declaredQueries = queries && declareQueries(queries);
+  const queriesInputTypes = queries && declaredQueries.InputType || {};
   const declaredCommands = commands && declareCommands(commands);
-  const declaredConnect = connect && declareConnect(connect);
+  const commandsInputTypes = commands && declaredCommands.InputType || {};
+  const declaredConnect = (connect || queries || commands) && declareConnect({
+    ...queriesInputTypes,
+    ...commandsInputTypes,
+    ...(connect || {})
+  });
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator({ queries, reducer: reduceQueryPropsFn });
 
   const propsTypes = {
     ...(__props ? __props : {}),
     ...(queries ? declaredQueries.Type : {}),
     ...(commands ? declaredCommands.Type : {}),
+    ...(queries || commands ? { transition: t.Function } : {}),
     ...(connect ? declaredConnect.Type : {})
   };
+
+  // used to filer out props that are "unwanted" below
+  const cleanProps = omit(difference(
+    Object.keys({ ...queriesInputTypes, ...commandsInputTypes }),
+    Object.keys(connect || {}).concat(queries || []).concat(commands || [])
+  ));
+
   const composedDecorators = flowRight(...compact([
+    declaredConnect,
     declaredQueries,
     reduceQueryProps,
-    declaredCommands,
-    declaredConnect
+    declaredCommands
   ]));
 
   const getLocals = mapProps || pick([
@@ -81,7 +97,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
 
     static displayName = displayName(Component, 'Container');
 
-    getLocals(props) {
+    getLocals(_props) {
+      const props = cleanProps(_props);
       const { readyState } = props;
       if (!readyState) {
         // this means there are no `queries` defined
