@@ -18,12 +18,11 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
   const globalizedLocalTypes = globalizeLocalKeys(local || {});
   const localizeProps = props => localizeLocalKeys({
     ...props,
-    transition: obj => {
-      // TODO: also support fns
-      if (t.Object.is(obj)) {
-        return props.transition(globalizeLocalKeys(obj));
+    transition: (...args) => {
+      if (args.length === 1 && t.Object.is(args[args.length - 1])) {
+        return props.transition(globalizeLocalKeys(args[args.length - 1]));
       }
-      return props.transition(obj);
+      throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
     }
   });
 
