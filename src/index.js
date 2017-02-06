@@ -12,14 +12,16 @@ import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import { defaultIsReady } from 'react-avenger/lib/loading';
-import displayName from './displayName';
+import _displayName from './displayName';
 import reduceQueryPropsDecorator from './reduceQueryPropsDecorator';
+import localizePropsDecorator from './localizePropsDecorator';
 
 const stripUndef = omitByF(isUndefined);
 
 const ContainerConfig = t.interface({
   isReady: t.maybe(t.Function),
   connect: t.maybe(t.dict(t.String, t.Type)),
+  local: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
   commands: t.maybe(t.list(t.String)),
   reduceQueryProps: t.maybe(t.Function),
@@ -42,23 +44,35 @@ const defaultDeclareConnect = (decl = {}, config = {}) => (
   _declareConnect(decl, { killProps: ['params', 'query', 'router'], ...config })
 );
 
+let _containerCounter = 0;
+const localPrefix = '__local';
+export function isLocalKey(key) {
+  return key.indexOf(localPrefix) === 0;
+}
+
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
   const {
     isReady = defaultIsReady,
-    connect, queries, commands,
+    connect, local, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
     propTypes: __props
   } = ContainerConfig(config);
 
+  const displayName = _displayName(Component, 'Container');
+  _containerCounter += 1; // eslint-disable-line operator-assignment
+  const containerNamespace = `${localPrefix}-${displayName}-${_containerCounter}__`;
+  const localizeProps = local && localizePropsDecorator({ containerNamespace, local });
+
   const declaredQueries = queries && declareQueries(queries);
   const queriesInputTypes = queries && declaredQueries.InputType || {};
   const declaredCommands = commands && declareCommands(commands);
   const commandsInputTypes = commands && declaredCommands.InputType || {};
-  const declaredConnect = (connect || queries || commands) && declareConnect({
+  const declaredConnect = (connect || local || queries || commands) && declareConnect({
     ...queriesInputTypes,
     ...commandsInputTypes,
-    ...(connect || {})
+    ...(connect || {}),
+    ...((local && localizeProps.GlobalDeclaration) || {})
   });
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator({ queries, reducer: reduceQueryPropsFn });
 
@@ -67,17 +81,19 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     ...(queries ? declaredQueries.Type : {}),
     ...(commands ? declaredCommands.Type : {}),
     ...(queries || commands ? { transition: t.Function } : {}),
-    ...(connect ? declaredConnect.Type : {})
+    ...(connect ? declaredConnect.Type : {}),
+    ...(local ? localizeProps.Type : {})
   };
 
   // used to filer out props that are "unwanted" below
   const cleanProps = omit(difference(
     Object.keys({ ...queriesInputTypes, ...commandsInputTypes }),
-    Object.keys(connect || {}).concat(queries || []).concat(commands || [])
+    Object.keys(connect || {}).concat(local || {}).concat(queries || []).concat(commands || [])
   ));
 
   const composedDecorators = flowRight(...compact([
     declaredConnect,
+    localizeProps,
     declaredQueries,
     reduceQueryProps,
     declaredCommands
@@ -86,7 +102,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const getLocals = mapProps || pick([
     ...(queries || []),
     ...(commands || []),
-    ...Object.keys(connect || {})
+    ...Object.keys({ ...(connect || {}), ...(local || {}) })
   ]);
 
   @composedDecorators
@@ -95,7 +111,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
 
-    static displayName = displayName(Component, 'Container');
+    static displayName = displayName;
 
     getLocals(_props) {
       const props = cleanProps(_props);
