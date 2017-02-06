@@ -2,6 +2,13 @@
 
 
 
+## [v0.7.0](https://github.com/buildo/react-container/tree/v0.7.0) (2017-02-06)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.6.0...v0.7.0)
+
+#### Breaking:
+
+- support for https://github.com/buildo/react-avenger/pull/26 [#29](https://github.com/buildo/react-container/issues/29)
+
 ## [v0.6.0](https://github.com/buildo/react-container/tree/v0.6.0) (2017-01-31)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.5.1...v0.6.0)
 
