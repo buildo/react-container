@@ -2,6 +2,13 @@
 
 
 
+## [v0.7.1](https://github.com/buildo/react-container/tree/v0.7.1) (2017-02-10)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.0...v0.7.1)
+
+#### New features:
+
+- add "local" api [#31](https://github.com/buildo/react-container/issues/31)
+
 ## [v0.7.0](https://github.com/buildo/react-container/tree/v0.7.0) (2017-02-06)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.6.0...v0.7.0)
 
