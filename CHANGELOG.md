@@ -2,6 +2,9 @@
 
 
 
+## [v0.7.4](https://github.com/buildo/react-container/tree/v0.7.4) (2017-02-11)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.3...v0.7.4)
+
 ## [v0.7.3](https://github.com/buildo/react-container/tree/v0.7.3) (2017-02-11)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.2...v0.7.3)
 
