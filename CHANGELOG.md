@@ -2,6 +2,13 @@
 
 
 
+## [v0.7.6](https://github.com/buildo/react-container/tree/v0.7.6) (2017-02-23)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.5...v0.7.6)
+
+#### Fixes (bugs & defects):
+
+- if clashing with query params or command params, local keys are not passed to mapProps [#34](https://github.com/buildo/react-container/issues/34)
+
 ## [v0.7.5](https://github.com/buildo/react-container/tree/v0.7.5) (2017-02-21)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.4...v0.7.5)
 
