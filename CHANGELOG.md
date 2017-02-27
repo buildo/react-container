@@ -2,6 +2,13 @@
 
 
 
+## [v0.7.7](https://github.com/buildo/react-container/tree/v0.7.7) (2017-02-27)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.6...v0.7.7)
+
+#### New features:
+
+- add `pure = true` to container api [#36](https://github.com/buildo/react-container/issues/36)
+
 ## [v0.7.6](https://github.com/buildo/react-container/tree/v0.7.6) (2017-02-23)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.5...v0.7.6)
 
