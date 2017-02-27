@@ -56,7 +56,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     connect, local, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
-    propTypes: __props
+    propTypes: __props,
+    pure: __pure = true
   } = ContainerConfig(config);
 
   const displayName = _displayName(Component, 'Container');
@@ -96,7 +97,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     localizeProps,
     declaredQueries,
     reduceQueryProps,
-    declaredCommands
+    declaredCommands,
+    __pure && pure
   ]));
 
   const getLocals = mapProps || pick([
@@ -107,7 +109,6 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
 
   @composedDecorators
   @skinnable(contains(Component))
-  @pure
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
 
