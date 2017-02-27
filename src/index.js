@@ -6,6 +6,7 @@ import omitByF from 'lodash/fp/omitBy';
 import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import isUndefined from 'lodash/isUndefined';
+import identity from 'lodash/identity';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
 import _declareConnect from 'buildo-state/lib/connect';
@@ -26,7 +27,8 @@ const ContainerConfig = t.interface({
   commands: t.maybe(t.list(t.String)),
   reduceQueryProps: t.maybe(t.Function),
   mapProps: t.maybe(t.Function),
-  propTypes: t.maybe(t.dict(t.String, t.Type))
+  propTypes: t.maybe(t.dict(t.String, t.Type)),
+  pure: t.maybe(t.Boolean)
 }, { strict: true, name: 'ContainerConfig' });
 
 const DecoratorConfig = t.interface({
@@ -56,7 +58,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     connect, local, queries, commands,
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
-    propTypes: __props
+    propTypes: __props,
+    pure: __pure = true
   } = ContainerConfig(config);
 
   const displayName = _displayName(Component, 'Container');
@@ -99,6 +102,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     declaredCommands
   ]));
 
+  const pureDecorator = __pure ? pure : identity;
+
   const getLocals = mapProps || pick([
     ...(queries || []),
     ...(commands || []),
@@ -107,7 +112,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
 
   @composedDecorators
   @skinnable(contains(Component))
-  @pure
+  @pureDecorator
   @props(propsTypes)
   class ContainerFactoryWrapper extends React.Component { // eslint-disable-line react/no-multi-comp
 
