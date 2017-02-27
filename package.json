@@ -29,7 +29,7 @@
     "buildo-state": "^0.4.0",
     "lodash": "^4.17.4",
     "react-avenger": "^2.1.0",
-    "revenge": "0.4.5",
+    "revenge": "^0.4.6",
     "tcomb-react": "0.9.0"
   },
   "peerDependencies": {
