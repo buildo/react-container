@@ -1,7 +1,4 @@
 {
-  "plugins": [
-    ["transform-es2015-classes"]
-  ],
   "presets":  [
     ["buildo", { env: "react" }]
   ]
