@@ -2,6 +2,17 @@
 
 
 
+## [v0.7.8](https://github.com/buildo/react-container/tree/v0.7.8) (2017-03-15)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.7...v0.7.8)
+
+#### Fixes (bugs & defects):
+
+- if clashing with query params or command params, propTypes keys are not passed to mapProps [#41](https://github.com/buildo/react-container/issues/41)
+
+#### New features:
+
+- Backport babel-preset-buildo [#39](https://github.com/buildo/react-container/issues/39)
+
 ## [v0.7.7](https://github.com/buildo/react-container/tree/v0.7.7) (2017-02-27)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.6...v0.7.7)
 
