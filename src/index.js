@@ -107,7 +107,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const getLocals = mapProps || pick([
     ...(queries || []),
     ...(commands || []),
-    ...Object.keys({ ...(connect || {}), ...(local || {}), ...__props || {} })
+    ...Object.keys({ ...(connect || {}), ...(local || {}), ...(__props || {}) })
   ]);
 
   @composedDecorators
