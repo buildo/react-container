@@ -91,7 +91,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   // used to filer out props that are "unwanted" below
   const cleanProps = omit(difference(
     Object.keys({ ...queriesInputTypes, ...commandsInputTypes }),
-    Object.keys(connect || {}).concat(Object.keys(local || {})).concat(queries || []).concat(commands || [])
+    Object.keys(connect || {}).concat(Object.keys(local || {})).concat(Object.keys(__props || {})).concat(queries || []).concat(commands || [])
   ));
 
   const composedDecorators = flowRight(...compact([
@@ -107,7 +107,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const getLocals = mapProps || pick([
     ...(queries || []),
     ...(commands || []),
-    ...Object.keys({ ...(connect || {}), ...(local || {}) })
+    ...Object.keys({ ...(connect || {}), ...(local || {}), ...(__props || {}) })
   ]);
 
   @composedDecorators
