@@ -3,6 +3,7 @@ import { skinnable, contains } from 'revenge';
 import { t, props } from 'tcomb-react';
 import mapKeys from 'lodash/mapKeys';
 import mapValues from 'lodash/mapValues';
+import reduce from 'lodash/reduce';
 import displayName from './displayName';
 
 export default function localizePropsDecorator({ containerNamespace, local }) {
@@ -12,19 +13,10 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
     }
     return k;
   });
-  const localizeLocalKeys = obj => mapKeys(obj, (_, k) => {
-    return k.replace(containerNamespace, '');
-  });
-  const globalizedLocalTypes = globalizeLocalKeys(local || {});
-  const localizeProps = props => localizeLocalKeys({
-    ...props,
-    transition: (...args) => {
-      if (args.length === 1 && t.Object.is(args[args.length - 1])) {
-        return props.transition(globalizeLocalKeys(args[args.length - 1]));
-      }
-      throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
-    }
-  });
+
+  const globalizedLocalTypes = globalizeLocalKeys(mapValues(local, ty => {
+    return t.maybe(t.dict(t.String, ty));
+  }) || {});
 
   const decorator = Component => {
     @skinnable(contains(Component))
@@ -35,12 +27,51 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
     class LocalizePropsWrapper extends React.Component {
       static displayName = displayName(Component, 'localizeProps');
 
-      getLocals = localizeProps;
+      static _instanceCount = 0;
+
+      globalizeLocalState = obj => reduce(obj, (acc, v, k) => {
+        const globalKey = local[k] ? `${containerNamespace}${k}` : k;
+        return {
+          ...acc,
+          [globalKey]: local[k] ? {
+            ...this.props[globalKey],
+            [this.instanceNamespace]: v
+          } : v
+        };
+      }, {});
+
+      localizeLocalState = obj => reduce(obj, (acc, v, k) => {
+        const localKey = k.replace(containerNamespace, '');
+        return {
+          ...acc,
+          [localKey]: local[localKey] && v ? v[this.instanceNamespace] : v
+        };
+      }, {});
+
+      localizeProps = props => this.localizeLocalState({
+        ...props,
+        transition: (...args) => {
+          if (args.length === 1 && t.Object.is(args[args.length - 1])) {
+            const globalizedProps = this.globalizeLocalState(args[args.length - 1]);
+            return props.transition(globalizedProps);
+          }
+          throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
+        }
+      });
+
+      getLocals = this.localizeProps;
+
+      componentWillMount = () => {
+        LocalizePropsWrapper._instanceCount += 1; // eslint-disable-line operator-assignment
+        this.instanceNamespace = `instance-${LocalizePropsWrapper._instanceCount}`;
+      }
 
       componentWillUnmount = () => {
         // cleanup local keys when dead
         setTimeout(() => {
-          this.props.transition(mapValues(globalizedLocalTypes, () => null));
+          this.props.transition(mapValues(globalizedLocalTypes, (_, k) => {
+            delete this.props[k][this.instanceNamespace];
+          }));
         });
       }
     }
