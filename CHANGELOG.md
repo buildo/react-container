@@ -2,6 +2,13 @@
 
 
 
+## [v0.7.9](https://github.com/buildo/react-container/tree/v0.7.9) (2017-04-20)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.8...v0.7.9)
+
+#### New features:
+
+- local state should be instance-specific and not class-specific [#43](https://github.com/buildo/react-container/issues/43)
+
 ## [v0.7.8](https://github.com/buildo/react-container/tree/v0.7.8) (2017-03-15)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.7...v0.7.8)
 
