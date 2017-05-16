@@ -1,5 +1,6 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
+import omit from 'lodash/fp/omit';
 import displayName from '../displayName';
 import { t } from 'tcomb-react';
 
@@ -17,6 +18,7 @@ const reduceQueryPropsReturn = (queries) => t.interface({
 
 export default ({ queries, reducer }) => {
   const pickQueriesAndReadyState = pick([...(queries || []), 'readyState']);
+  const omitQueriesAndReadyState = omit([...(queries || []), 'readyState']);
   const ReduceQueryPropsReturn = reduceQueryPropsReturn(queries);
 
   return Component => (
@@ -39,7 +41,7 @@ export default ({ queries, reducer }) => {
       }
 
       render() {
-        return <Component {...{ ...this.props, ...this.state.queryProps }} />;
+        return <Component {...{ ...omitQueriesAndReadyState(this.props), ...this.state.queryProps }} />;
       }
     }
   );
