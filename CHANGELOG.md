@@ -2,6 +2,18 @@
 
 
 
+## [v0.7.10](https://github.com/buildo/react-container/tree/v0.7.10) (2017-05-16)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.9...v0.7.10)
+
+#### New features:
+
+- extract and export here `cacheQueryValues` `reduceQueryProps` function [#49](https://github.com/buildo/react-container/issues/49)
+- use scriptoni for linting [#45](https://github.com/buildo/react-container/issues/45)
+
+#### Fixes (bugs & defects):
+
+- local is trying to delete what's not there on unmount [#47](https://github.com/buildo/react-container/issues/47)
+
 ## [v0.7.9](https://github.com/buildo/react-container/tree/v0.7.9) (2017-04-20)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.8...v0.7.9)
 
@@ -61,11 +73,14 @@
 - support for https://github.com/buildo/react-avenger/pull/26 [#29](https://github.com/buildo/react-container/issues/29)
 
 ## [v0.6.0](https://github.com/buildo/react-container/tree/v0.6.0) (2017-01-31)
-[Full Changelog](https://github.com/buildo/react-container/compare/v0.5.1...v0.6.0)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.5.2...v0.6.0)
 
 #### Breaking:
 
 - reduceQueryPropsDecorator: support last avenger readyState api [#27](https://github.com/buildo/react-container/issues/27)
+
+## [v0.5.2](https://github.com/buildo/react-container/tree/v0.5.2) (2017-02-27)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.5.1...v0.5.2)
 
 ## [v0.5.1](https://github.com/buildo/react-container/tree/v0.5.1) (2017-01-27)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.5.0...v0.5.1)
