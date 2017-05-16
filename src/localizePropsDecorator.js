@@ -70,7 +70,9 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
         // cleanup local keys when dead
         setTimeout(() => {
           this.props.transition(mapValues(globalizedLocalTypes, (_, k) => {
-            delete this.props[k][this.instanceNamespace];
+            if (typeof this.props[k] !== 'undefined') {
+              delete this.props[k][this.instanceNamespace];
+            }
           }));
         });
       }
