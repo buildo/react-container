@@ -21,23 +21,25 @@ export default ({ queries, reducer }) => {
   const omitQueriesAndReadyState = omit([...(queries || []), 'readyState']);
   const ReduceQueryPropsReturn = reduceQueryPropsReturn(queries);
 
+  const getReducedQueryProps = (state, props) => {
+    const rqp = reducer(state.queryPropsAccumulator, pickQueriesAndReadyState(props));
+    t.assert(ReduceQueryPropsReturn.is(rqp), () => `
+      \`reduceQueryProps\` function should return a \`{ props, accumulator }\` object.
+      \`props\` should conform to declared queries plus \`readyState\`, no additional keys are allowed.
+    `);
+    const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
+    return { queryPropsAccumulator, queryProps };
+  };
+
   return Component => (
     class ReduceQueryPropsWrapper extends React.Component {
 
       static displayName = displayName(Component, 'reduceQueryProps');
 
-      state = {};
+      state = getReducedQueryProps({}, this.props);
 
       componentWillReceiveProps(newProps) {
-        const rqp = reducer(this.state.queryPropsAccumulator, pickQueriesAndReadyState(newProps));
-        t.assert(ReduceQueryPropsReturn.is(rqp), () => `
-          \`reduceQueryProps\` function should return a \`{ props, accumulator }\` object.
-          \`props\` should conform to declared queries plus \`readyState\`, no additional keys are allowed.
-        `);
-        const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
-        this.setState({
-          queryPropsAccumulator, queryProps
-        });
+        this.setState(getReducedQueryProps(this.state, newProps));
       }
 
       render() {
