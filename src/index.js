@@ -14,7 +14,8 @@ import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import { defaultIsReady } from 'react-avenger/lib/loading';
 import _displayName from './displayName';
-import reduceQueryPropsDecorator from './reduceQueryPropsDecorator';
+import reduceQueryPropsDecorator from './reduceQueryPropsDecorator/decorator';
+export { cacheQueryValues } from './reduceQueryPropsDecorator/reducers';
 import localizePropsDecorator from './localizePropsDecorator';
 
 const stripUndef = omitByF(isUndefined);

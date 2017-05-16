@@ -1,6 +1,6 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
-import displayName from './displayName';
+import displayName from '../displayName';
 import { t } from 'tcomb-react';
 
 const ReadyState = t.interface({
