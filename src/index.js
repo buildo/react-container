@@ -68,7 +68,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const containerNamespace = `${localPrefix}-${displayName}-${_containerCounter}__`;
   const localizeProps = local && localizePropsDecorator({ containerNamespace, local });
 
-  const declaredQueries = queries && declareQueries(queries);
+  const declaredQueries = queries && declareQueries(queries, { querySync: typeof window === 'undefined' });
   const queriesInputTypes = queries && declaredQueries.InputType || {};
   const declaredCommands = commands && declareCommands(commands);
   const commandsInputTypes = commands && declaredCommands.InputType || {};
