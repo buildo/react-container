@@ -2,6 +2,13 @@
 
 
 
+## [v0.7.11](https://github.com/buildo/react-container/tree/v0.7.11) (2017-05-17)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.10...v0.7.11)
+
+#### New features:
+
+- react-avenger/queries `querySync` should be set to `true` when running on node [#53](https://github.com/buildo/react-container/issues/53)
+
 ## [v0.7.10](https://github.com/buildo/react-container/tree/v0.7.10) (2017-05-16)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.9...v0.7.10)
 
