@@ -29,7 +29,8 @@ const ContainerConfig = t.interface({
   reduceQueryProps: t.maybe(t.Function),
   mapProps: t.maybe(t.Function),
   propTypes: t.maybe(t.dict(t.String, t.Type)),
-  pure: t.maybe(t.Boolean)
+  pure: t.maybe(t.Boolean),
+  querySync: t.maybe(t.Boolean)
 }, { strict: true, name: 'ContainerConfig' });
 
 const DecoratorConfig = t.interface({
@@ -60,7 +61,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
     reduceQueryProps: reduceQueryPropsFn,
     mapProps,
     propTypes: __props,
-    pure: __pure = true
+    pure: __pure = true,
+    querySync = typeof window === 'undefined'
   } = ContainerConfig(config);
 
   const displayName = _displayName(Component, 'Container');
@@ -68,7 +70,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const containerNamespace = `${localPrefix}-${displayName}-${_containerCounter}__`;
   const localizeProps = local && localizePropsDecorator({ containerNamespace, local });
 
-  const declaredQueries = queries && declareQueries(queries, { querySync: typeof window === 'undefined' });
+  const declaredQueries = queries && declareQueries(queries, { querySync });
   const queriesInputTypes = queries && declaredQueries.InputType || {};
   const declaredCommands = commands && declareCommands(commands);
   const commandsInputTypes = commands && declaredCommands.InputType || {};
