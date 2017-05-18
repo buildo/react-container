@@ -2,6 +2,13 @@
 
 
 
+## [v0.7.12](https://github.com/buildo/react-container/tree/v0.7.12) (2017-05-18)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.11...v0.7.12)
+
+#### New features:
+
+- it should be possible to set react-avenger/queries `querySync` via container api [#55](https://github.com/buildo/react-container/issues/55)
+
 ## [v0.7.11](https://github.com/buildo/react-container/tree/v0.7.11) (2017-05-17)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.10...v0.7.11)
 
