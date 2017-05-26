@@ -9,7 +9,6 @@ import isUndefined from 'lodash/isUndefined';
 import identity from 'lodash/identity';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
-import _declareConnect from 'buildo-state/lib/connect';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
 import { defaultIsReady } from 'react-avenger/lib/loading';
@@ -22,7 +21,7 @@ const stripUndef = omitByF(isUndefined);
 
 const ContainerConfig = t.interface({
   isReady: t.maybe(t.Function),
-  connect: t.maybe(t.dict(t.String, t.Type)),
+  connect: t.maybe(t.list(t.String)),
   local: t.maybe(t.dict(t.String, t.Type)),
   queries: t.maybe(t.list(t.String)),
   commands: t.maybe(t.list(t.String)),
@@ -34,7 +33,7 @@ const ContainerConfig = t.interface({
 }, { strict: true, name: 'ContainerConfig' });
 
 const DecoratorConfig = t.interface({
-  declareConnect: t.maybe(t.Function),
+  declareConnect: t.Function,
   declareQueries: t.maybe(t.Function),
   declareCommands: t.maybe(t.Function)
 }, { strict: true, name: 'DecoratorConfig' });
@@ -44,14 +43,9 @@ const PublicDecoratorConfig = DecoratorConfig.extend({
   allCommands: t.maybe(t.Object)
 }, { strict: true, name: 'PublicDecoratorConfig' });
 
-const defaultDeclareConnect = (decl = {}, config = {}) => (
-  _declareConnect(decl, { killProps: ['params', 'query', 'router'], ...config })
-);
-
 let _containerCounter = 0;
-const localPrefix = '__local';
 export function isLocalKey(key) {
-  return key.indexOf(localPrefix) === 0;
+  return key === '___local';
 }
 
 const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
@@ -67,19 +61,18 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
 
   const displayName = _displayName(Component, 'Container');
   _containerCounter += 1; // eslint-disable-line operator-assignment
-  const containerNamespace = `${localPrefix}-${displayName}-${_containerCounter}__`;
+  const containerNamespace = `${displayName}-${_containerCounter}__`;
   const localizeProps = local && localizePropsDecorator({ containerNamespace, local });
 
   const declaredQueries = queries && declareQueries(queries, { querySync });
-  const queriesInputTypes = queries && declaredQueries.InputType || {};
+  const queriesInputTypes = queries && Object.keys(declaredQueries.InputType) || [];
   const declaredCommands = commands && declareCommands(commands);
-  const commandsInputTypes = commands && declaredCommands.InputType || {};
-  const declaredConnect = (connect || local || queries || commands) && declareConnect({
-    ...queriesInputTypes,
-    ...commandsInputTypes,
-    ...(connect || {}),
-    ...((local && localizeProps.GlobalDeclaration) || {})
-  });
+  const commandsInputTypes = commands && Object.keys(declaredCommands.InputType) || [];
+  const declaredConnect = (connect || local || queries || commands) && declareConnect([
+    ...omit(queriesInputTypes, Object.keys(local)),
+    ...omit(commandsInputTypes, Object.keys(local)),
+    ...(connect || [])
+  ].concat(local ? ['___local'] : []));
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator({ queries, reducer: reduceQueryPropsFn });
 
   const propsTypes = {
@@ -94,7 +87,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   // used to filer out props that are "unwanted" below
   const cleanProps = omit(difference(
     Object.keys({ ...queriesInputTypes, ...commandsInputTypes }),
-    Object.keys(connect || {}).concat(Object.keys(local || {})).concat(Object.keys(__props || {})).concat(queries || []).concat(commands || [])
+    (connect || []).concat(Object.keys(local || {})).concat(Object.keys(__props || {})).concat(queries || []).concat(commands || [])
   ));
 
   const composedDecorators = flowRight(...compact([
@@ -110,7 +103,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const getLocals = mapProps || pick([
     ...(queries || []),
     ...(commands || []),
-    ...Object.keys({ ...(connect || {}), ...(local || {}), ...(__props || {}) })
+    ...(connect || []),
+    ...Object.keys({ ...(local || {}), ...(__props || {}) })
   ]);
 
   @composedDecorators
@@ -142,18 +136,23 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   return ContainerFactoryWrapper;
 };
 
-const defaultWithConnectOnly = decorator(DecoratorConfig({ declareConnect: defaultDeclareConnect }));
 
-export default (...args) => t.match(args[0],
-  t.Function, () => defaultWithConnectOnly(...args),
-  DecoratorConfig, () => decorator(args[0]),
-  PublicDecoratorConfig, () => {
-    const {
-      declareQueries: dq, allQueries, declareCommands: dc, allCommands,
-      declareConnect = defaultDeclareConnect
-    } = args[0];
-    const declareQueries = dq || (allQueries && _declareQueries(allQueries)) || undefined;
-    const declareCommands = dc || (allCommands && _declareCommands(allCommands)) || undefined;
-    return decorator({ declareConnect, declareQueries, declareCommands });
-  }
-);
+export default config => {
+
+  const declareConnect = (decl = [], connectConfig = {}) => (
+    config.declareConnect(decl, { killProps: ['params', 'query', 'router'], ...connectConfig })
+  );
+
+
+  return t.match(config,
+    DecoratorConfig, () => decorator({ ...config, declareConnect }),
+    PublicDecoratorConfig, () => {
+      const {
+        declareQueries: dq, allQueries, declareCommands: dc, allCommands
+      } = config;
+      const declareQueries = dq || (allQueries && _declareQueries(allQueries)) || undefined;
+      const declareCommands = dc || (allCommands && _declareCommands(allCommands)) || undefined;
+      return decorator({ declareConnect, declareQueries, declareCommands });
+    }
+  );
+};
