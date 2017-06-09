@@ -69,8 +69,8 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const declaredCommands = commands && declareCommands(commands);
   const commandsInputTypes = commands && Object.keys(declaredCommands.InputType) || [];
   const declaredConnect = (connect || local || queries || commands) && declareConnect([
-    ...omit(queriesInputTypes, Object.keys(local)),
-    ...omit(commandsInputTypes, Object.keys(local)),
+    ...omit(queriesInputTypes, Object.keys(local || {})),
+    ...omit(commandsInputTypes, Object.keys(local || {})),
     ...(connect || [])
   ].concat(local ? ['___local'] : []));
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator({ queries, reducer: reduceQueryPropsFn });
