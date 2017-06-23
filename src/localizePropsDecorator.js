@@ -4,9 +4,15 @@ import { t, props } from 'tcomb-react';
 import mapKeys from 'lodash/mapKeys';
 import mapValues from 'lodash/mapValues';
 import reduce from 'lodash/reduce';
+import pick from 'lodash/pick';
+import omit from 'lodash/omit';
 import displayName from './displayName';
 
 export default function localizePropsDecorator({ containerNamespace, local }) {
+
+  const localKeys = Object.keys(local);
+  const globalizedLocalKeys = localKeys.map(k => `${containerNamespace}${k}`);
+
   const globalizeLocalKeys = obj => mapKeys(obj, (_, k) => {
     if (local[k]) {
       return `${containerNamespace}${k}`;
@@ -21,7 +27,7 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
   const decorator = Component => {
     @skinnable(contains(Component))
     @props({
-      ...globalizedLocalTypes,
+      ___local: t.maybe(t.interface(globalizedLocalTypes, { strict: false })),
       transition: t.Function
     }, { strict: false })
     class LocalizePropsWrapper extends React.Component {
@@ -30,13 +36,16 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
       static _instanceCount = 0;
 
       globalizeLocalState = obj => reduce(obj, (acc, v, k) => {
-        const globalKey = local[k] ? `${containerNamespace}${k}` : k;
+        const globalKey = `${containerNamespace}${k}`;
+
+        const { ___local = {} } = this.props;
+
         return {
           ...acc,
-          [globalKey]: local[k] ? {
-            ...this.props[globalKey],
+          [globalKey]: {
+            ...___local[globalKey],
             [this.instanceNamespace]: v
-          } : v
+          }
         };
       }, {});
 
@@ -48,12 +57,22 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
         };
       }, {});
 
-      localizeProps = props => this.localizeLocalState({
+      localizeProps = ({ ___local = {}, ...props }) => ({
         ...props,
+        ...this.localizeLocalState(pick(___local, globalizedLocalKeys)),
         transition: (...args) => {
-          if (args.length === 1 && t.Object.is(args[args.length - 1])) {
-            const globalizedProps = this.globalizeLocalState(args[args.length - 1]);
-            return props.transition(globalizedProps);
+          if (args.length === 1 && t.Object.is(args[0])) {
+            const patch = args[0];
+            const localProps = this.globalizeLocalState(pick(patch, localKeys));
+            const globalProps = omit(patch, localKeys);
+
+            return props.transition({
+              ...globalProps,
+              ___local: {
+                ...___local,
+                ...localProps
+              }
+            });
           }
           throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
         }
