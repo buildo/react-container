@@ -2,6 +2,18 @@
 
 
 
+## [v0.8.0](https://github.com/buildo/react-container/tree/v0.8.0) (2017-06-23)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.7.12...v0.8.0)
+
+#### Breaking:
+
+- update buildo-state dependency [#60](https://github.com/buildo/react-container/issues/60)
+- Support new state API [#58](https://github.com/buildo/react-container/issues/58)
+
+#### New features:
+
+- document `cacheQueryValues` [#51](https://github.com/buildo/react-container/issues/51)
+
 ## [v0.7.12](https://github.com/buildo/react-container/tree/v0.7.12) (2017-05-18)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.11...v0.7.12)
 
