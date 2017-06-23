@@ -27,9 +27,7 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
   const decorator = Component => {
     @skinnable(contains(Component))
     @props({
-      ___local: t.maybe(t.interface({
-        ...globalizedLocalTypes
-      }, { strict: false })),
+      ___local: t.maybe(t.interface(globalizedLocalTypes, { strict: false })),
       transition: t.Function
     }, { strict: false })
     class LocalizePropsWrapper extends React.Component {
@@ -51,22 +49,19 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
         };
       }, {});
 
-      localizeLocalState = obj => {
-        const state = reduce(obj, (acc, v, k) => {
-          const localKey = k.replace(containerNamespace, '');
-          return {
-            ...acc,
-            [localKey]: local[localKey] && v ? v[this.instanceNamespace] : v
-          };
-        }, {});
-        return state;
-      }
+      localizeLocalState = obj => reduce(obj, (acc, v, k) => {
+        const localKey = k.replace(containerNamespace, '');
+        return {
+          ...acc,
+          [localKey]: local[localKey] && v ? v[this.instanceNamespace] : v
+        };
+      }, {});
 
       localizeProps = ({ ___local = {}, ...props }) => ({
         ...props,
         ...this.localizeLocalState(pick(___local, globalizedLocalKeys)),
         transition: (...args) => {
-          if (args.length === 1 && t.Object.is(args[args.length - 1])) {
+          if (args.length === 1 && t.Object.is(args[0])) {
             const patch = args[0];
             const localProps = this.globalizeLocalState(pick(patch, localKeys));
             const globalProps = omit(patch, localKeys);
