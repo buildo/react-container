@@ -57,25 +57,28 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
         };
       }, {});
 
+      transitionWithLocal = (...args) => {
+        if (args.length === 1 && t.Object.is(args[0])) {
+          const patch = args[0];
+          const localProps = this.globalizeLocalState(pick(patch, localKeys));
+          const globalProps = omit(patch, localKeys);
+
+          return props.transition(oldstate => ({
+            ...oldstate,
+            ...globalProps,
+            ___local: {
+              ...oldstate.___local,
+              ...localProps
+            }
+          }));
+        }
+        throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
+      }
+
       localizeProps = ({ ___local = {}, ...props }) => ({
         ...props,
         ...this.localizeLocalState(pick(___local, globalizedLocalKeys)),
-        transition: (...args) => {
-          if (args.length === 1 && t.Object.is(args[0])) {
-            const patch = args[0];
-            const localProps = this.globalizeLocalState(pick(patch, localKeys));
-            const globalProps = omit(patch, localKeys);
-
-            return props.transition({
-              ...globalProps,
-              ___local: {
-                ...___local,
-                ...localProps
-              }
-            });
-          }
-          throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
-        }
+        transition: this.transitionWithLocal
       });
 
       getLocals = this.localizeProps;
@@ -88,11 +91,7 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
       componentWillUnmount = () => {
         // cleanup local keys when dead
         setTimeout(() => {
-          this.props.transition(mapValues(globalizedLocalTypes, (_, k) => {
-            if (typeof this.props[k] !== 'undefined') {
-              delete this.props[k][this.instanceNamespace];
-            }
-          }));
+          this.transitionWithLocal(mapValues(local, () => undefined));
         });
       }
     }
