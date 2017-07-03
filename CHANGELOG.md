@@ -2,6 +2,13 @@
 
 
 
+## [v0.8.1](https://github.com/buildo/react-container/tree/v0.8.1) (2017-07-03)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.8.0...v0.8.1)
+
+#### Fixes (bugs & defects):
+
+- fix transition on local [#62](https://github.com/buildo/react-container/issues/62)
+
 ## [v0.8.0](https://github.com/buildo/react-container/tree/v0.8.0) (2017-06-23)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.7.12...v0.8.0)
 
