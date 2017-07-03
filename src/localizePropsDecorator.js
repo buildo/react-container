@@ -66,13 +66,14 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
             const localProps = this.globalizeLocalState(pick(patch, localKeys));
             const globalProps = omit(patch, localKeys);
 
-            return props.transition({
+            return props.transition(oldstate => ({
+              ...oldstate,
               ...globalProps,
               ___local: {
-                ...___local,
+                ...oldstate.___local,
                 ...localProps
               }
-            });
+            }));
           }
           throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
         }
