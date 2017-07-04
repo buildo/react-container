@@ -2,6 +2,14 @@
 
 
 
+## [v0.8.3](https://github.com/buildo/react-container/tree/v0.8.3) (2017-07-04)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.8.2...v0.8.3)
+
+#### Fixes (bugs & defects):
+
+- Clean up local state [#67](https://github.com/buildo/react-container/issues/67)
+- local state is not cleared on component unmount [#64](https://github.com/buildo/react-container/issues/64)
+
 ## [v0.8.2](https://github.com/buildo/react-container/tree/v0.8.2) (2017-07-03)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.8.1...v0.8.2)
 
