@@ -6,7 +6,13 @@ import mapValues from 'lodash/mapValues';
 import reduce from 'lodash/reduce';
 import pick from 'lodash/pick';
 import omit from 'lodash/omit';
+import omitByF from 'lodash/fp/omitBy';
+import isEqualF from 'lodash/fp/isEqual';
+import isNil from 'lodash/isNil';
 import displayName from './displayName';
+
+const omitNils = omitByF(isNil);
+const omitEmpties = omitByF(isEqualF({}));
 
 export default function localizePropsDecorator({ containerNamespace, local }) {
 
@@ -42,10 +48,10 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
 
         return {
           ...acc,
-          [globalKey]: {
+          [globalKey]: omitNils({
             ...___local[globalKey],
             [this.instanceNamespace]: v
-          }
+          })
         };
       }, {});
 
@@ -66,10 +72,10 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
           return this.props.transition(oldstate => ({
             ...oldstate,
             ...globalProps,
-            ___local: {
+            ___local: omitEmpties({
               ...oldstate.___local,
               ...localProps
-            }
+            })
           }));
         }
         throw new Error(`Sorry, local transitions do not yet support arguments ${args.map(v => typeof v).join(',')}`);
