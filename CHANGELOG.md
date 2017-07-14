@@ -2,6 +2,13 @@
 
 
 
+## [v0.9.0](https://github.com/buildo/react-container/tree/v0.9.0) (2017-07-14)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.8.3...v0.9.0)
+
+#### Breaking:
+
+- bump buildo-state version [#70](https://github.com/buildo/react-container/issues/70)
+
 ## [v0.8.3](https://github.com/buildo/react-container/tree/v0.8.3) (2017-07-04)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.8.2...v0.8.3)
 
