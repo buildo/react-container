@@ -2,6 +2,13 @@
 
 
 
+## [v0.10.0](https://github.com/buildo/react-container/tree/v0.10.0) (2017-07-24)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.9.0...v0.10.0)
+
+#### Breaking:
+
+- container should not connect to every query/command input param [#69](https://github.com/buildo/react-container/issues/69)
+
 ## [v0.9.0](https://github.com/buildo/react-container/tree/v0.9.0) (2017-07-14)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.8.3...v0.9.0)
 
