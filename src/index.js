@@ -7,6 +7,7 @@ import compact from 'lodash/compact';
 import flowRight from 'lodash/flowRight';
 import isUndefined from 'lodash/isUndefined';
 import identity from 'lodash/identity';
+import intersection from 'lodash/intersection';
 import { t, props } from 'tcomb-react';
 import { skinnable, pure, contains } from 'revenge';
 import _declareQueries from 'react-avenger/lib/queries';
@@ -33,6 +34,7 @@ const ContainerConfig = t.interface({
 }, { strict: true, name: 'ContainerConfig' });
 
 const DecoratorConfig = t.interface({
+  appState: t.Function,
   declareConnect: t.Function,
   declareQueries: t.maybe(t.Function),
   declareCommands: t.maybe(t.Function)
@@ -48,7 +50,7 @@ export function isLocalKey(key) {
   return key === '___local';
 }
 
-const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Component, config = {}) => {
+const decorator = ({ declareQueries, declareCommands, declareConnect, appState }) => (Component, config = {}) => {
   const {
     isReady = defaultIsReady,
     connect, local, queries, commands,
@@ -65,13 +67,15 @@ const decorator = ({ declareQueries, declareCommands, declareConnect }) => (Comp
   const localizeProps = local && localizePropsDecorator({ containerNamespace, local });
 
   const declaredQueries = queries && declareQueries(queries, { querySync });
-  const queriesInputTypes = queries && Object.keys(declaredQueries.InputType) || [];
   const declaredCommands = commands && declareCommands(commands);
+
+  const queriesInputTypes = queries && Object.keys(declaredQueries.InputType) || [];
   const commandsInputTypes = commands && Object.keys(declaredCommands.InputType) || [];
+  const inputTypesFromState = intersection([...queriesInputTypes, ...commandsInputTypes], Object.keys(appState.meta.props));
+
   const declaredConnect = (connect || local || queries || commands) && declareConnect([
-    ...difference(queriesInputTypes, Object.keys(local || {})),
-    ...difference(commandsInputTypes, Object.keys(local || {})),
-    ...(connect || [])
+    ...(connect || []),
+    ...(inputTypesFromState || [])
   ].concat(local ? ['___local'] : []));
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator({ queries, reducer: reduceQueryPropsFn });
 
@@ -143,16 +147,15 @@ export default config => {
     config.declareConnect(decl, { killProps: ['params', 'query', 'router'], ...connectConfig })
   );
 
-
   return t.match(config,
     DecoratorConfig, () => decorator({ ...config, declareConnect }),
     PublicDecoratorConfig, () => {
       const {
-        declareQueries: dq, allQueries, declareCommands: dc, allCommands
+        declareQueries: dq, allQueries, declareCommands: dc, allCommands, appState
       } = config;
       const declareQueries = dq || (allQueries && _declareQueries(allQueries)) || undefined;
       const declareCommands = dc || (allCommands && _declareCommands(allCommands)) || undefined;
-      return decorator({ declareConnect, declareQueries, declareCommands });
+      return decorator({ declareConnect, declareQueries, declareCommands, appState });
     }
   );
 };
