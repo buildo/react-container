@@ -67,14 +67,16 @@ const decorator = ({ declareQueries, declareCommands, declareConnect, appState }
   const localizeProps = local && localizePropsDecorator({ containerNamespace, local });
 
   const declaredQueries = queries && declareQueries(queries, { querySync });
-  const queriesInputTypes = queries && Object.keys(declaredQueries.InputType) || [];
   const declaredCommands = commands && declareCommands(commands);
+
+  const queriesInputTypes = queries && Object.keys(declaredQueries.InputType) || [];
   const commandsInputTypes = commands && Object.keys(declaredCommands.InputType) || [];
-  const declaredConnect = (connect || local || queries || commands) && declareConnect(intersection([
-    ...difference(queriesInputTypes, Object.keys(local || {})),
-    ...difference(commandsInputTypes, Object.keys(local || {})),
-    ...(connect || [])
-  ].concat(local ? ['___local'] : []), Object.keys(appState.meta.props)));
+  const inputTypesFromState = intersection([...queriesInputTypes, ...commandsInputTypes], Object.keys(appState.meta.props));
+
+  const declaredConnect = (connect || local || queries || commands) && declareConnect([
+    ...(connect || []),
+    ...(inputTypesFromState || [])
+  ].concat(local ? ['___local'] : []));
   const reduceQueryProps = queries && reduceQueryPropsFn && reduceQueryPropsDecorator({ queries, reducer: reduceQueryPropsFn });
 
   const propsTypes = {
