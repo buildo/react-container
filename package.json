@@ -27,9 +27,9 @@
   },
   "homepage": "https://github.com/buildo/react-container#readme",
   "dependencies": {
-    "buildo-state": "^0.6.0",
+    "buildo-state": "^0.8.0",
     "lodash": "^4.17.4",
-    "react-avenger": "^3.0.0",
+    "react-avenger": "^4.0.0",
     "revenge": "0.4.5",
     "tcomb-react": "0.9.0"
   },
