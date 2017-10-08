@@ -8,7 +8,9 @@ import flowRight from 'lodash/flowRight';
 import isUndefined from 'lodash/isUndefined';
 import identity from 'lodash/identity';
 import intersection from 'lodash/intersection';
-import { t, props } from 'tcomb-react';
+import * as t from 'io-ts';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { props } from 'prop-types-ts';
 import { skinnable, pure, contains } from 'revenge';
 import _declareQueries from 'react-avenger/lib/queries';
 import _declareCommands from 'react-avenger/lib/commands';
@@ -20,30 +22,30 @@ import localizePropsDecorator from './localizePropsDecorator';
 
 const stripUndef = omitByF(isUndefined);
 
-const ContainerConfig = t.interface({
-  isReady: t.maybe(t.Function),
-  connect: t.maybe(t.list(t.String)),
-  local: t.maybe(t.dict(t.String, t.Type)),
-  queries: t.maybe(t.list(t.String)),
-  commands: t.maybe(t.list(t.String)),
-  reduceQueryProps: t.maybe(t.Function),
-  mapProps: t.maybe(t.Function),
-  propTypes: t.maybe(t.dict(t.String, t.Type)),
-  pure: t.maybe(t.Boolean),
-  querySync: t.maybe(t.Boolean)
-}, { strict: true, name: 'ContainerConfig' });
+const ContainerConfig = t.partial({
+  isReady: t.Function,
+  connect: t.array(t.string),
+  local: t.dictionary(t.string, t.any), // TODO: t.Type
+  queries: t.array(t.string),
+  commands: t.array(t.string),
+  reduceQueryProps: t.Function,
+  mapProps: t.Function,
+  propTypes: t.dictionary(t.string, t.any), // TODO: t.Type
+  pure: t.boolean,
+  querySync: t.boolean
+}, 'ContainerConfig');
 
 const DecoratorConfig = t.interface({
-  appState: t.Function,
+  appState: t.any, // TODO: t.Type (was t.Function anyway)
   declareConnect: t.Function,
-  declareQueries: t.maybe(t.Function),
-  declareCommands: t.maybe(t.Function)
-}, { strict: true, name: 'DecoratorConfig' });
+  declareQueries: t.union([t.undefined, t.Function]),
+  declareCommands: t.union([t.undefined, t.Function])
+}, 'DecoratorConfig');
 
-const PublicDecoratorConfig = DecoratorConfig.extend({
-  allQueries: t.maybe(t.Object),
-  allCommands: t.maybe(t.Object)
-}, { strict: true, name: 'PublicDecoratorConfig' });
+const PublicDecoratorConfig = t.intersection([DecoratorConfig, t.partial({
+  allQueries: t.Dictionary,
+  allCommands: t.Dictionary
+})], 'PublicDecoratorConfig');
 
 let _containerCounter = 0;
 export function isLocalKey(key) {
@@ -59,7 +61,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect, appState }
     propTypes: __props,
     pure: __pure = true,
     querySync = typeof window === 'undefined'
-  } = ContainerConfig(config);
+  } = t.validate(config, ContainerConfig).fold(ThrowReporter.report, v => v);
 
   const displayName = _displayName(Component, 'Container');
   _containerCounter += 1; // eslint-disable-line operator-assignment
@@ -147,15 +149,16 @@ export default config => {
     config.declareConnect(decl, { killProps: ['params', 'query', 'router'], ...connectConfig })
   );
 
-  return t.match(config,
-    DecoratorConfig, () => decorator({ ...config, declareConnect }),
-    PublicDecoratorConfig, () => {
-      const {
-        declareQueries: dq, allQueries, declareCommands: dc, allCommands, appState
-      } = config;
-      const declareQueries = dq || (allQueries && _declareQueries(allQueries)) || undefined;
-      const declareCommands = dc || (allCommands && _declareCommands(allCommands)) || undefined;
-      return decorator({ declareConnect, declareQueries, declareCommands, appState });
-    }
-  );
+  if (PublicDecoratorConfig.is(config)) {
+    const {
+      declareQueries: dq, allQueries, declareCommands: dc, allCommands, appState
+    } = config;
+    const declareQueries = dq || (allQueries && _declareQueries(allQueries)) || undefined;
+    const declareCommands = dc || (allCommands && _declareCommands(allCommands)) || undefined;
+    return decorator({ declareConnect, declareQueries, declareCommands, appState });
+  } else if (DecoratorConfig.is(config)) {
+    return decorator({ ...config, declareConnect });
+  } else {
+    throw new Error('Invalid confiuration provided');
+  }
 };

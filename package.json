@@ -28,10 +28,11 @@
   "homepage": "https://github.com/buildo/react-container#readme",
   "dependencies": {
     "buildo-state": "^0.8.0",
+    "io-ts": "^0.9.4",
     "lodash": "^4.17.4",
+    "prop-types-ts": "^0.5.1",
     "react-avenger": "^4.0.0",
-    "revenge": "0.4.5",
-    "tcomb-react": "0.9.0"
+    "revenge": "0.4.5"
   },
   "peerDependencies": {
     "react": "0.14 || 15"

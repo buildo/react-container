@@ -1,6 +1,7 @@
 import React from 'react';
 import { skinnable, contains } from 'revenge';
-import { t, props } from 'tcomb-react';
+import * as t from 'io-ts';
+import { props } from 'prop-types-ts';
 import mapKeys from 'lodash/mapKeys';
 import mapValues from 'lodash/mapValues';
 import reduce from 'lodash/reduce';
@@ -27,13 +28,13 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
   });
 
   const globalizedLocalTypes = globalizeLocalKeys(mapValues(local, ty => {
-    return t.maybe(t.dict(t.String, ty));
+    return t.union([t.undefined, t.dictionary(t.string, ty)]);
   }) || {});
 
   const decorator = Component => {
     @skinnable(contains(Component))
     @props({
-      ___local: t.maybe(t.interface(globalizedLocalTypes, { strict: false })),
+      ___local: t.union([t.undefined, t.interface(globalizedLocalTypes)]),
       transition: t.Function
     }, { strict: false })
     class LocalizePropsWrapper extends React.Component {
@@ -64,7 +65,7 @@ export default function localizePropsDecorator({ containerNamespace, local }) {
       }, {});
 
       transitionWithLocal = (...args) => {
-        if (args.length === 1 && t.Object.is(args[0])) {
+        if (args.length === 1 && t.Dictionary.is(args[0])) {
           const patch = args[0];
           const localProps = this.globalizeLocalState(pick(patch, localKeys));
           const globalProps = omit(patch, localKeys);
