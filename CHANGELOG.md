@@ -2,6 +2,13 @@
 
 
 
+## [v0.11.1](https://github.com/buildo/react-container/tree/v0.11.1) (2017-11-03)
+[Full Changelog](https://github.com/buildo/react-container/compare/v0.11.0...v0.11.1)
+
+#### New features:
+
+- cleanProps is not working [#75](https://github.com/buildo/react-container/issues/75)
+
 ## [v0.11.0](https://github.com/buildo/react-container/tree/v0.11.0) (2017-08-22)
 [Full Changelog](https://github.com/buildo/react-container/compare/v0.10.0...v0.11.0)
 
