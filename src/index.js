@@ -90,7 +90,7 @@ const decorator = ({ declareQueries, declareCommands, declareConnect, appState }
 
   // used to filer out props that are "unwanted" below
   const cleanProps = omit(difference(
-    Object.keys({ ...queriesInputTypes, ...commandsInputTypes }),
+    [...queriesInputTypes, ...commandsInputTypes],
     (connect || []).concat(Object.keys(local || {})).concat(Object.keys(__props || {})).concat(queries || []).concat(commands || [])
   ));
 
