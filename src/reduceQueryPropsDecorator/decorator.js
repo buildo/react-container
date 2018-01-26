@@ -1,19 +1,20 @@
 import React from 'react';
 import pick from 'lodash/fp/pick';
 import displayName from '../displayName';
-import { t } from 'tcomb-react';
+import * as t from 'io-ts';
+import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 
 const ReadyState = t.interface({
-  loading: t.Boolean, ready: t.Boolean
-}, { strict: true, name: 'ReadyState' });
+  loading: t.boolean, ready: t.boolean
+}, 'ReadyState');
 
 const reduceQueryPropsReturn = (queries) => t.interface({
-  accumulator: t.Any,
+  accumulator: t.any,
   props: t.interface({
-    ...queries.reduce((ac, k) => ({ ...ac, [k]: t.Any }), {}),
-    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: ReadyState }), {}), { strict: true, name: 'ReadyStates' })
-  }, { strict: true, name: 'QueriesProps' })
-}, { strict: true, name: 'ReduceQueryPropsReturn' });
+    ...queries.reduce((ac, k) => ({ ...ac, [k]: t.any }), {}),
+    readyState: t.interface(queries.reduce((ac, k) => ({ ...ac, [k]: ReadyState }), {}), 'ReadyStates')
+  }, 'QueriesProps')
+}, 'ReduceQueryPropsReturn');
 
 export default ({ queries, reducer }) => {
   const pickQueriesAndReadyState = pick([...(queries || []), 'readyState']);
@@ -28,10 +29,9 @@ export default ({ queries, reducer }) => {
 
       componentWillReceiveProps(newProps) {
         const rqp = reducer(this.state.queryPropsAccumulator, pickQueriesAndReadyState(newProps));
-        t.assert(ReduceQueryPropsReturn.is(rqp), () => `
-          \`reduceQueryProps\` function should return a \`{ props, accumulator }\` object.
-          \`props\` should conform to declared queries plus \`readyState\`, no additional keys are allowed.
-        `);
+        if (process.env.NODE_ENV !== 'production') {
+          ThrowReporter.report(t.validate(rqp, ReduceQueryPropsReturn));
+        }
         const { accumulator: queryPropsAccumulator, props: queryProps } = rqp;
         this.setState({
           queryPropsAccumulator, queryProps
